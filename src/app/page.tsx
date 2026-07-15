@@ -6,15 +6,11 @@ import { SearchBar } from "@/components/SearchBar";
 import { EntityPanel } from "@/components/EntityPanel";
 import { JourneyDashboard } from "@/components/JourneyDashboard";
 import type { SearchResult } from "@/lib/search";
-import type { Company, MapEntity } from "@/types/entities";
+import type { MapEntity } from "@/types/entities";
 
 export default function Home() {
   const mapRef = useRef<MapHandle>(null);
   const [selectedEntity, setSelectedEntity] = useState<MapEntity | null>(null);
-
-  function handleMapCompanySelect(company: Company) {
-    setSelectedEntity({ kind: "company", data: company });
-  }
 
   function handleSearchSelect(result: SearchResult) {
     setSelectedEntity(result.entity);
@@ -23,7 +19,7 @@ export default function Home() {
 
   return (
     <div className="relative h-dvh w-full overflow-hidden bg-black">
-      <Map ref={mapRef} onSelectCompany={handleMapCompanySelect} />
+      <Map ref={mapRef} onSelectEntity={setSelectedEntity} />
 
       <div className="pointer-events-none absolute inset-0 p-4 sm:p-6">
         <div className="pointer-events-auto mx-auto w-full max-w-xl">

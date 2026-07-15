@@ -145,7 +145,7 @@ export const EVENTS: Event[] = [
     name: "AI Builders Hackathon",
     type: "hackathon",
     date: "2026-08-15",
-    location: { lat: 43.6596, lng: -79.3899 },
+    location: { lat: 43.6599, lng: -79.3904 },
     companyIds: ["company-northbound-robotics", "company-wavelength-health"],
   },
   {
@@ -153,7 +153,7 @@ export const EVENTS: Event[] = [
     name: "Toronto Tech Week Meetup",
     type: "networking",
     date: "2026-09-10",
-    location: { lat: 43.6448, lng: -79.4008 },
+    location: { lat: 43.6451, lng: -79.4013 },
     companyIds: ["company-ledgerly", "company-loop-commerce"],
   },
 ];
