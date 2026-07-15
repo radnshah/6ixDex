@@ -158,6 +158,10 @@ export const EVENTS: Event[] = [
   },
 ];
 
+export function getCompanyById(id: string): Company | undefined {
+  return COMPANIES.find((company) => company.id === id);
+}
+
 export function getPersonById(id: string): Person | undefined {
   return PEOPLE.find((person) => person.id === id);
 }

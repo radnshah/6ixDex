@@ -1,29 +1,40 @@
 "use client";
 
-import { useState } from "react";
-import Map from "@/components/Map";
+import { useRef, useState } from "react";
+import Map, { type MapHandle } from "@/components/Map";
 import { SearchBar } from "@/components/SearchBar";
 import { EntityPanel } from "@/components/EntityPanel";
 import { JourneyDashboard } from "@/components/JourneyDashboard";
-import type { Company } from "@/types/entities";
+import type { SearchResult } from "@/lib/search";
+import type { Company, MapEntity } from "@/types/entities";
 
 export default function Home() {
-  const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
+  const mapRef = useRef<MapHandle>(null);
+  const [selectedEntity, setSelectedEntity] = useState<MapEntity | null>(null);
+
+  function handleMapCompanySelect(company: Company) {
+    setSelectedEntity({ kind: "company", data: company });
+  }
+
+  function handleSearchSelect(result: SearchResult) {
+    setSelectedEntity(result.entity);
+    mapRef.current?.flyTo(result.location);
+  }
 
   return (
     <div className="relative h-dvh w-full overflow-hidden bg-black">
-      <Map onSelectCompany={setSelectedCompany} />
+      <Map ref={mapRef} onSelectCompany={handleMapCompanySelect} />
 
       <div className="pointer-events-none absolute inset-0 p-4 sm:p-6">
         <div className="pointer-events-auto mx-auto w-full max-w-xl">
-          <SearchBar />
+          <SearchBar onSelectResult={handleSearchSelect} />
         </div>
 
-        {selectedCompany && (
+        {selectedEntity && (
           <div className="pointer-events-none absolute right-4 top-20 sm:right-6 sm:top-24">
             <EntityPanel
-              company={selectedCompany}
-              onClose={() => setSelectedCompany(null)}
+              entity={selectedEntity}
+              onClose={() => setSelectedEntity(null)}
             />
           </div>
         )}

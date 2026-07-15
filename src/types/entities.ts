@@ -59,5 +59,6 @@ export interface Event {
 
 export type MapEntity =
   | { kind: "company"; data: Company }
+  | { kind: "person"; data: Person }
   | { kind: "place"; data: Place }
   | { kind: "event"; data: Event };

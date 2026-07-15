@@ -1,6 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import {
@@ -12,13 +18,14 @@ import {
   BUILDINGS_MIN_ZOOM,
 } from "@/lib/mapbox-config";
 import { COMPANIES, PLACES, EVENTS } from "@/data/mock-data";
-import type { Company } from "@/types/entities";
+import { ENTITY_COLORS } from "@/lib/labels";
+import type { Company, GeoPoint } from "@/types/entities";
 
-const MARKER_COLORS = {
-  company: "#22d3ee",
-  place: "#a78bfa",
-  event: "#fbbf24",
-} as const;
+export interface MapHandle {
+  flyTo: (location: GeoPoint) => void;
+}
+
+const FLY_TO_ZOOM = 15.5;
 
 function createMarkerElement(
   color: string,
@@ -53,17 +60,26 @@ function createMarkerElement(
   return root;
 }
 
-export default function Map({
-  onSelectCompany,
-}: {
-  onSelectCompany?: (company: Company) => void;
-}) {
+const Map = forwardRef<
+  MapHandle,
+  { onSelectCompany?: (company: Company) => void }
+>(function Map({ onSelectCompany }, ref) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
   const onSelectCompanyRef = useRef(onSelectCompany);
   onSelectCompanyRef.current = onSelectCompany;
   const [error, setError] = useState<string | null>(null);
+
+  useImperativeHandle(ref, () => ({
+    flyTo(location: GeoPoint) {
+      mapRef.current?.flyTo({
+        center: [location.lng, location.lat],
+        zoom: FLY_TO_ZOOM,
+        essential: true,
+      });
+    },
+  }));
 
   useEffect(() => {
     const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
@@ -135,7 +151,7 @@ export default function Map({
     });
 
     for (const place of PLACES) {
-      const el = createMarkerElement(MARKER_COLORS.place, false, "place");
+      const el = createMarkerElement(ENTITY_COLORS.place, false, "place");
       const marker = new mapboxgl.Marker({ element: el })
         .setLngLat([place.location.lng, place.location.lat])
         .addTo(map);
@@ -143,7 +159,7 @@ export default function Map({
     }
 
     for (const event of EVENTS) {
-      const el = createMarkerElement(MARKER_COLORS.event, false, "event");
+      const el = createMarkerElement(ENTITY_COLORS.event, false, "event");
       const marker = new mapboxgl.Marker({ element: el })
         .setLngLat([event.location.lng, event.location.lat])
         .addTo(map);
@@ -151,7 +167,7 @@ export default function Map({
     }
 
     for (const company of COMPANIES) {
-      const el = createMarkerElement(MARKER_COLORS.company, true, "company");
+      const el = createMarkerElement(ENTITY_COLORS.company, true, "company");
       el.addEventListener("click", (e) => {
         e.stopPropagation();
         onSelectCompanyRef.current?.(company);
@@ -181,4 +197,6 @@ export default function Map({
   }
 
   return <div ref={containerRef} className="absolute inset-0 h-full w-full" />;
-}
+});
+
+export default Map;
