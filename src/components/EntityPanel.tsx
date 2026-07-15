@@ -2,25 +2,30 @@
 
 import { FloatingPanel } from "./FloatingPanel";
 import {
-  getCompanyById,
   getEventById,
+  getOrganizationById,
   getPersonById,
   getPlaceById,
 } from "@/data/mock-data";
-import { PLACE_TYPE_LABELS } from "@/lib/labels";
-import type { Company, Event, MapEntity, Person, Place } from "@/types/entities";
+import type {
+  Event,
+  MapEntity,
+  Organization,
+  Person,
+  Place,
+} from "@/types/entities";
 
 function getHeaderInfo(entity: MapEntity): { title: string; subtitle: string } {
   switch (entity.kind) {
-    case "company":
-      return { title: entity.data.name, subtitle: entity.data.industry };
+    case "organization":
+      return {
+        title: entity.data.name,
+        subtitle: entity.data.industry ?? entity.data.subtype,
+      };
     case "person":
       return { title: entity.data.name, subtitle: entity.data.role };
     case "place":
-      return {
-        title: entity.data.name,
-        subtitle: PLACE_TYPE_LABELS[entity.data.type] ?? entity.data.type,
-      };
+      return { title: entity.data.name, subtitle: entity.data.subtype };
     case "event":
       return { title: entity.data.name, subtitle: entity.data.date };
   }
@@ -34,24 +39,54 @@ function SectionLabel({ children }: { children: string }) {
   );
 }
 
-function CompanyBody({ company }: { company: Company }) {
-  const founders = (company.founderIds ?? [])
+function OrganizationBody({ organization }: { organization: Organization }) {
+  const founders = (organization.founderIds ?? [])
     .map(getPersonById)
     .filter((person) => person !== undefined);
-  const place = company.placeId ? getPlaceById(company.placeId) : undefined;
-  const events = (company.eventIds ?? [])
+  const place = organization.placeId
+    ? getPlaceById(organization.placeId)
+    : undefined;
+  const events = (organization.eventIds ?? [])
     .map(getEventById)
     .filter((event) => event !== undefined);
+
+  const facts = [
+    { label: "Stage", value: organization.stage },
+    {
+      label: "Founded",
+      value: organization.founded ? String(organization.founded) : undefined,
+    },
+    {
+      label: "Team size",
+      value: organization.employeeCount
+        ? `${organization.employeeCount}`
+        : undefined,
+    },
+    { label: "HQ", value: organization.headquarters },
+  ].filter((fact) => fact.value);
 
   return (
     <>
       <p className="mt-3 text-sm leading-relaxed text-zinc-300">
-        {company.description}
+        {organization.description}
       </p>
 
-      {company.techStack && company.techStack.length > 0 && (
+      {facts.length > 0 && (
+        <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2">
+          {facts.map((fact) => (
+            <div key={fact.label}>
+              <p className="text-[11px] uppercase tracking-wide text-zinc-500">
+                {fact.label}
+              </p>
+              <p className="text-sm text-zinc-200">{fact.value}</p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {organization.techStack && organization.techStack.length > 0 && (
         <div className="mt-4 flex flex-wrap gap-1.5">
-          {company.techStack.map((tech) => (
+          {organization.techStack.map((tech) => (
             <span
               key={tech}
               className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-xs text-zinc-300"
@@ -67,7 +102,7 @@ function CompanyBody({ company }: { company: Company }) {
           <SectionLabel>Founders</SectionLabel>
           <ul className="mt-1.5 space-y-1">
             {founders.map((person) => (
-              <li key={person.id} className="text-sm text-zinc-200">
+              <li key={person.entityId} className="text-sm text-zinc-200">
                 {person.name}{" "}
                 <span className="text-zinc-500">— {person.role}</span>
               </li>
@@ -88,7 +123,7 @@ function CompanyBody({ company }: { company: Company }) {
           <SectionLabel>Events</SectionLabel>
           <ul className="mt-1.5 space-y-1">
             {events.map((event) => (
-              <li key={event.id} className="text-sm text-zinc-200">
+              <li key={event.entityId} className="text-sm text-zinc-200">
                 {event.name}{" "}
                 <span className="text-zinc-500">— {event.date}</span>
               </li>
@@ -97,23 +132,37 @@ function CompanyBody({ company }: { company: Company }) {
         </div>
       )}
 
-      {company.website && (
-        <a
-          href={company.website}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-5 inline-block text-sm font-medium text-cyan-400 hover:text-cyan-300"
-        >
-          Visit website →
-        </a>
+      {(organization.website || organization.linkedin) && (
+        <div className="mt-5 flex gap-4">
+          {organization.website && (
+            <a
+              href={organization.website}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm font-medium text-cyan-400 hover:text-cyan-300"
+            >
+              Website →
+            </a>
+          )}
+          {organization.linkedin && (
+            <a
+              href={organization.linkedin}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm font-medium text-cyan-400 hover:text-cyan-300"
+            >
+              LinkedIn →
+            </a>
+          )}
+        </div>
       )}
     </>
   );
 }
 
 function PersonBody({ person }: { person: Person }) {
-  const company = person.companyIds?.[0]
-    ? getCompanyById(person.companyIds[0])
+  const organization = person.organizationIds?.[0]
+    ? getOrganizationById(person.organizationIds[0])
     : undefined;
 
   return (
@@ -123,11 +172,21 @@ function PersonBody({ person }: { person: Person }) {
           {person.bio}
         </p>
       )}
-      {company && (
+      {organization && (
         <div className="mt-4">
-          <SectionLabel>Company</SectionLabel>
-          <p className="mt-1.5 text-sm text-zinc-200">{company.name}</p>
+          <SectionLabel>Organization</SectionLabel>
+          <p className="mt-1.5 text-sm text-zinc-200">{organization.name}</p>
         </div>
+      )}
+      {person.linkedin && (
+        <a
+          href={person.linkedin}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-5 inline-block text-sm font-medium text-cyan-400 hover:text-cyan-300"
+        >
+          LinkedIn →
+        </a>
       )}
     </>
   );
@@ -147,19 +206,25 @@ function PlaceBody({ place }: { place: Place }) {
 }
 
 function EventBody({ event }: { event: Event }) {
-  const companies = (event.companyIds ?? [])
-    .map(getCompanyById)
-    .filter((company) => company !== undefined);
+  const organizations = (event.organizationIds ?? [])
+    .map(getOrganizationById)
+    .filter((organization) => organization !== undefined);
 
   return (
     <>
-      {companies.length > 0 && (
+      {event.subtype && (
+        <p className="mt-3 text-sm leading-relaxed text-zinc-300">
+          {event.category} · {event.subtype}
+        </p>
+      )}
+
+      {organizations.length > 0 && (
         <div className="mt-3">
-          <SectionLabel>Companies attending</SectionLabel>
+          <SectionLabel>Organizations attending</SectionLabel>
           <ul className="mt-1.5 space-y-1">
-            {companies.map((company) => (
-              <li key={company.id} className="text-sm text-zinc-200">
-                {company.name}
+            {organizations.map((organization) => (
+              <li key={organization.entityId} className="text-sm text-zinc-200">
+                {organization.name}
               </li>
             ))}
           </ul>
@@ -204,7 +269,9 @@ export function EntityPanel({
         </button>
       </div>
 
-      {entity.kind === "company" && <CompanyBody company={entity.data} />}
+      {entity.kind === "organization" && (
+        <OrganizationBody organization={entity.data} />
+      )}
       {entity.kind === "person" && <PersonBody person={entity.data} />}
       {entity.kind === "place" && <PlaceBody place={entity.data} />}
       {entity.kind === "event" && <EventBody event={entity.data} />}

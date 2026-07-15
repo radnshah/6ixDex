@@ -17,7 +17,7 @@ import {
   MAP_STYLE,
   BUILDINGS_MIN_ZOOM,
 } from "@/lib/mapbox-config";
-import { COMPANIES, PLACES, EVENTS } from "@/data/mock-data";
+import { ORGANIZATIONS, PLACES, EVENTS } from "@/data/mock-data";
 import { ENTITY_COLORS } from "@/lib/labels";
 import type { GeoPoint, MapEntity } from "@/types/entities";
 
@@ -174,14 +174,18 @@ const Map = forwardRef<
       markersRef.current.push(marker);
     }
 
-    for (const company of COMPANIES) {
-      const el = createMarkerElement(ENTITY_COLORS.company, true, "company");
+    for (const organization of ORGANIZATIONS) {
+      const el = createMarkerElement(
+        ENTITY_COLORS.organization,
+        true,
+        "organization",
+      );
       el.addEventListener("click", (e) => {
         e.stopPropagation();
-        onSelectEntityRef.current?.({ kind: "company", data: company });
+        onSelectEntityRef.current?.({ kind: "organization", data: organization });
       });
       const marker = new mapboxgl.Marker({ element: el })
-        .setLngLat([company.location.lng, company.location.lat])
+        .setLngLat([organization.location.lng, organization.location.lat])
         .addTo(map);
       markersRef.current.push(marker);
     }

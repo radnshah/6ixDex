@@ -1,5 +1,10 @@
-import { COMPANIES, PEOPLE, PLACES, EVENTS, getCompanyById } from "@/data/mock-data";
-import { PLACE_TYPE_LABELS } from "@/lib/labels";
+import {
+  ORGANIZATIONS,
+  PEOPLE,
+  PLACES,
+  EVENTS,
+  getOrganizationById,
+} from "@/data/mock-data";
 import type { GeoPoint, MapEntity } from "@/types/entities";
 
 export interface SearchResult {
@@ -13,35 +18,35 @@ export interface SearchResult {
 function buildSearchIndex(): SearchResult[] {
   const results: SearchResult[] = [];
 
-  for (const company of COMPANIES) {
+  for (const organization of ORGANIZATIONS) {
     results.push({
-      id: company.id,
-      name: company.name,
-      subtitle: company.industry,
-      location: company.location,
-      entity: { kind: "company", data: company },
+      id: organization.entityId,
+      name: organization.name,
+      subtitle: organization.industry ?? organization.subtype,
+      location: organization.location,
+      entity: { kind: "organization", data: organization },
     });
   }
 
   for (const person of PEOPLE) {
-    const company = person.companyIds?.[0]
-      ? getCompanyById(person.companyIds[0])
+    const organization = person.organizationIds?.[0]
+      ? getOrganizationById(person.organizationIds[0])
       : undefined;
-    if (!company) continue;
+    if (!organization) continue;
     results.push({
-      id: person.id,
+      id: person.entityId,
       name: person.name,
-      subtitle: `${person.role} at ${company.name}`,
-      location: company.location,
+      subtitle: `${person.role} at ${organization.name}`,
+      location: organization.location,
       entity: { kind: "person", data: person },
     });
   }
 
   for (const place of PLACES) {
     results.push({
-      id: place.id,
+      id: place.entityId,
       name: place.name,
-      subtitle: PLACE_TYPE_LABELS[place.type] ?? place.type,
+      subtitle: place.subtype,
       location: place.location,
       entity: { kind: "place", data: place },
     });
@@ -49,7 +54,7 @@ function buildSearchIndex(): SearchResult[] {
 
   for (const event of EVENTS) {
     results.push({
-      id: event.id,
+      id: event.entityId,
       name: event.name,
       subtitle: event.date,
       location: event.location,

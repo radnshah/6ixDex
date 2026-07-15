@@ -1,137 +1,195 @@
-import type { Company, Event, Person, Place } from "@/types/entities";
+import type {
+  Content,
+  Event,
+  Journal,
+  Organization,
+  Person,
+  Place,
+} from "@/types/entities";
 
 export const PEOPLE: Person[] = [
   {
-    id: "person-aisha-bello",
+    entityId: "person-aisha-bello",
     name: "Aisha Bello",
     role: "Founder & CEO",
     bio: "Robotics engineer turned founder, building autonomous systems for last-mile logistics.",
-    companyIds: ["company-northbound-robotics"],
+    linkedin: "https://linkedin.com/in/aisha-bello-example",
+    organizationIds: ["org-northbound-robotics"],
   },
   {
-    id: "person-marcus-chen",
+    entityId: "person-marcus-chen",
     name: "Marcus Chen",
     role: "Founder",
     bio: "Ex-fintech engineer focused on embedded ledger infrastructure for SMBs.",
-    companyIds: ["company-ledgerly"],
+    linkedin: "https://linkedin.com/in/marcus-chen-example",
+    organizationIds: ["org-ledgerly"],
   },
   {
-    id: "person-priya-nair",
+    entityId: "person-priya-nair",
     name: "Priya Nair",
     role: "Co-founder",
     bio: "Building distributed energy storage software for the grid of tomorrow.",
-    companyIds: ["company-greengrid-energy"],
+    linkedin: "https://linkedin.com/in/priya-nair-example",
+    organizationIds: ["org-greengrid-energy"],
   },
   {
-    id: "person-devon-clarke",
+    entityId: "person-devon-clarke",
     name: "Devon Clarke",
     role: "Founder",
     bio: "Former clinician building diagnostic tooling for primary care.",
-    companyIds: ["company-wavelength-health"],
+    linkedin: "https://linkedin.com/in/devon-clarke-example",
+    organizationIds: ["org-wavelength-health"],
   },
   {
-    id: "person-sofia-marchetti",
+    entityId: "person-sofia-marchetti",
     name: "Sofia Marchetti",
     role: "Founder",
     bio: "Data scientist building analytics infrastructure for logistics networks.",
-    companyIds: ["company-kelp-analytics"],
+    linkedin: "https://linkedin.com/in/sofia-marchetti-example",
+    organizationIds: ["org-kelp-analytics"],
   },
   {
-    id: "person-jordan-lee",
+    entityId: "person-jordan-lee",
     name: "Jordan Lee",
     role: "Founder",
     bio: "Building commerce tooling for independent Canadian retailers.",
-    companyIds: ["company-loop-commerce"],
+    linkedin: "https://linkedin.com/in/jordan-lee-example",
+    organizationIds: ["org-loop-commerce"],
   },
 ];
 
 export const PLACES: Place[] = [
   {
-    id: "place-mars-discovery-district",
+    entityId: "place-mars-discovery-district",
     name: "MaRS Discovery District",
-    type: "incubator",
+    category: "Workspace",
+    subtype: "Office",
     location: { lat: 43.6596, lng: -79.3899 },
     address: "101 College St, Toronto",
   },
   {
-    id: "place-one-eleven",
+    entityId: "place-one-eleven",
     name: "ONE ELEVEN",
-    type: "coworking",
+    category: "Workspace",
+    subtype: "Coworking Space",
     location: { lat: 43.6448, lng: -79.4008 },
     address: "111 King St W, Toronto",
   },
   {
-    id: "place-dmz",
+    entityId: "place-dmz",
     name: "DMZ",
-    type: "accelerator",
+    category: "Workspace",
+    subtype: "Office",
     location: { lat: 43.6577, lng: -79.3788 },
     address: "10 Dundas St E, Toronto",
   },
 ];
 
-export const COMPANIES: Company[] = [
+export const ORGANIZATIONS: Organization[] = [
   {
-    id: "company-northbound-robotics",
+    entityId: "org-northbound-robotics",
     name: "Northbound Robotics",
+    category: "Company",
+    subtype: "Startup",
     description: "Autonomous delivery robots for dense urban environments.",
     industry: "Robotics",
     location: { lat: 43.644, lng: -79.403 },
     website: "https://northboundrobotics.example.com",
+    linkedin: "https://linkedin.com/company/northbound-robotics-example",
+    founded: 2023,
+    employeeCount: 14,
+    stage: "Seed",
+    headquarters: "Toronto, ON",
     techStack: ["ROS", "Python", "C++"],
     aiStack: ["PyTorch", "Computer Vision"],
     founderIds: ["person-aisha-bello"],
     eventIds: ["event-ai-builders-hackathon"],
   },
   {
-    id: "company-ledgerly",
+    entityId: "org-ledgerly",
     name: "Ledgerly",
+    category: "Company",
+    subtype: "Startup",
     description: "Embedded ledger infrastructure for small business banking.",
     industry: "Fintech",
     location: { lat: 43.6483, lng: -79.3805 },
     website: "https://ledgerly.example.com",
+    linkedin: "https://linkedin.com/company/ledgerly-example",
+    founded: 2022,
+    employeeCount: 22,
+    stage: "Series A",
+    headquarters: "Toronto, ON",
     techStack: ["TypeScript", "Postgres"],
     founderIds: ["person-marcus-chen"],
     eventIds: ["event-tech-week-meetup"],
   },
   {
-    id: "company-greengrid-energy",
+    entityId: "org-greengrid-energy",
     name: "GreenGrid Energy",
+    category: "Company",
+    subtype: "Startup",
     description: "Software for distributed energy storage and grid balancing.",
     industry: "Clean Energy",
     location: { lat: 43.6385, lng: -79.421 },
     website: "https://greengridenergy.example.com",
+    linkedin: "https://linkedin.com/company/greengrid-energy-example",
+    founded: 2024,
+    employeeCount: 8,
+    stage: "Pre-seed",
+    headquarters: "Toronto, ON",
     techStack: ["Rust", "Kubernetes"],
     founderIds: ["person-priya-nair"],
   },
   {
-    id: "company-wavelength-health",
+    entityId: "org-wavelength-health",
     name: "Wavelength Health",
+    category: "Company",
+    subtype: "Startup",
     description: "Diagnostic decision-support tooling for primary care clinics.",
     industry: "Health Tech",
     location: { lat: 43.659, lng: -79.388 },
     website: "https://wavelengthhealth.example.com",
+    linkedin: "https://linkedin.com/company/wavelength-health-example",
+    founded: 2023,
+    employeeCount: 11,
+    stage: "Seed",
+    headquarters: "Toronto, ON",
     aiStack: ["Clinical NLP"],
     founderIds: ["person-devon-clarke"],
     placeId: "place-mars-discovery-district",
     eventIds: ["event-ai-builders-hackathon"],
   },
   {
-    id: "company-kelp-analytics",
+    entityId: "org-kelp-analytics",
     name: "Kelp Analytics",
+    category: "Company",
+    subtype: "Scale-up",
     description: "Analytics infrastructure for logistics and supply chain networks.",
     industry: "Data & AI",
     location: { lat: 43.6503, lng: -79.3596 },
     website: "https://kelpanalytics.example.com",
+    linkedin: "https://linkedin.com/company/kelp-analytics-example",
+    founded: 2020,
+    employeeCount: 46,
+    stage: "Series B",
+    headquarters: "Toronto, ON",
     techStack: ["Snowflake", "dbt"],
     founderIds: ["person-sofia-marchetti"],
   },
   {
-    id: "company-loop-commerce",
+    entityId: "org-loop-commerce",
     name: "Loop Commerce",
+    category: "Company",
+    subtype: "Startup",
     description: "Commerce tooling built for independent Canadian retailers.",
     industry: "E-commerce",
     location: { lat: 43.6455, lng: -79.399 },
     website: "https://loopcommerce.example.com",
+    linkedin: "https://linkedin.com/company/loop-commerce-example",
+    founded: 2023,
+    employeeCount: 9,
+    stage: "Seed",
+    headquarters: "Toronto, ON",
     techStack: ["Next.js", "Shopify APIs"],
     founderIds: ["person-jordan-lee"],
     placeId: "place-one-eleven",
@@ -141,35 +199,104 @@ export const COMPANIES: Company[] = [
 
 export const EVENTS: Event[] = [
   {
-    id: "event-ai-builders-hackathon",
+    entityId: "event-ai-builders-hackathon",
     name: "AI Builders Hackathon",
-    type: "hackathon",
+    category: "Competition",
+    subtype: "Hackathon",
     date: "2026-08-15",
     location: { lat: 43.6599, lng: -79.3904 },
-    companyIds: ["company-northbound-robotics", "company-wavelength-health"],
+    organizationIds: ["org-northbound-robotics", "org-wavelength-health"],
   },
   {
-    id: "event-tech-week-meetup",
+    entityId: "event-tech-week-meetup",
     name: "Toronto Tech Week Meetup",
-    type: "networking",
+    category: "Networking",
+    subtype: "Meetup",
     date: "2026-09-10",
     location: { lat: 43.6451, lng: -79.4013 },
-    companyIds: ["company-ledgerly", "company-loop-commerce"],
+    organizationIds: ["org-ledgerly", "org-loop-commerce"],
   },
 ];
 
-export function getCompanyById(id: string): Company | undefined {
-  return COMPANIES.find((company) => company.id === id);
+export const CONTENT: Content[] = [
+  {
+    entityId: "content-northbound-demo",
+    name: "Northbound Robotics: sidewalk delivery demo",
+    category: "Video",
+    platform: "YouTube",
+    url: "https://youtube.com/watch?v=example-northbound-demo",
+    publishedAt: "2026-06-02",
+    relatedOrganizationIds: ["org-northbound-robotics"],
+  },
+  {
+    entityId: "content-hackathon-recap",
+    name: "AI Builders Hackathon recap",
+    category: "Image",
+    platform: "Instagram",
+    url: "https://instagram.com/p/example-hackathon-recap",
+    publishedAt: "2026-08-16",
+    relatedEventIds: ["event-ai-builders-hackathon"],
+  },
+  {
+    entityId: "content-build-session",
+    name: "Live build session: shipping the search bar",
+    category: "Livestream",
+    platform: "Twitch",
+    url: "https://twitch.tv/example-build-session",
+    publishedAt: "2026-07-10",
+  },
+  {
+    entityId: "content-founder-interview",
+    name: "Founder interview: Marcus Chen on embedded ledgers",
+    category: "Video",
+    platform: "LinkedIn",
+    url: "https://linkedin.com/posts/example-founder-interview",
+    publishedAt: "2026-09-11",
+    relatedOrganizationIds: ["org-ledgerly"],
+    relatedEventIds: ["event-tech-week-meetup"],
+  },
+];
+
+export const JOURNAL: Journal[] = [
+  {
+    entityId: "journal-hackathon-reflection",
+    name: "Reflections from the AI Builders Hackathon",
+    category: "LinkedIn Post",
+    body: "Spent the weekend at MaRS for the AI Builders Hackathon — energy in the room was incredible. Met the Northbound Robotics and Wavelength Health teams, both shipping genuinely useful things.",
+    date: "2026-08-17",
+    relatedEventIds: ["event-ai-builders-hackathon"],
+    relatedOrganizationIds: ["org-northbound-robotics", "org-wavelength-health"],
+  },
+  {
+    entityId: "journal-ledgerly-note",
+    name: "Quick take on Ledgerly's pitch",
+    category: "X Post",
+    body: "Ledgerly's embedded ledger pitch at Tech Week was sharp — small business banking infra is underrated.",
+    date: "2026-09-10",
+    relatedOrganizationIds: ["org-ledgerly"],
+    relatedEventIds: ["event-tech-week-meetup"],
+  },
+  {
+    entityId: "journal-onboarding-notes",
+    name: "Week one notes",
+    category: "Notes",
+    body: "Starting to map out the Toronto ecosystem properly. ONE ELEVEN and DMZ both worth a second visit — lots of overlap in the founders hanging around each space.",
+    date: "2026-05-20",
+  },
+];
+
+export function getOrganizationById(entityId: string): Organization | undefined {
+  return ORGANIZATIONS.find((organization) => organization.entityId === entityId);
 }
 
-export function getPersonById(id: string): Person | undefined {
-  return PEOPLE.find((person) => person.id === id);
+export function getPersonById(entityId: string): Person | undefined {
+  return PEOPLE.find((person) => person.entityId === entityId);
 }
 
-export function getPlaceById(id: string): Place | undefined {
-  return PLACES.find((place) => place.id === id);
+export function getPlaceById(entityId: string): Place | undefined {
+  return PLACES.find((place) => place.entityId === entityId);
 }
 
-export function getEventById(id: string): Event | undefined {
-  return EVENTS.find((event) => event.id === id);
+export function getEventById(entityId: string): Event | undefined {
+  return EVENTS.find((event) => event.entityId === entityId);
 }

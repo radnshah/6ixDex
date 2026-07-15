@@ -1,4 +1,4 @@
-import { COMPANIES, EVENTS, PEOPLE } from "./mock-data";
+import { CONTENT, EVENTS, ORGANIZATIONS, PEOPLE } from "./mock-data";
 
 export interface JourneyStat {
   label: string;
@@ -7,8 +7,8 @@ export interface JourneyStat {
 
 export const JOURNEY_STATS: JourneyStat[] = [
   { label: "Days on journey", value: 58 },
-  { label: "Startups visited", value: COMPANIES.length },
+  { label: "Startups visited", value: ORGANIZATIONS.length },
   { label: "Events attended", value: EVENTS.length },
-  { label: "Content created", value: 4 },
+  { label: "Content created", value: CONTENT.length },
   { label: "People met", value: PEOPLE.length },
 ];
