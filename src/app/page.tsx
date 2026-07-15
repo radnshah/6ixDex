@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Map, { type MapHandle } from "@/components/Map";
 import { SearchBar } from "@/components/SearchBar";
 import { EntityPanel } from "@/components/EntityPanel";
@@ -8,16 +9,69 @@ import { FilterMenu } from "@/components/FilterMenu";
 import { JourneyDashboard } from "@/components/JourneyDashboard";
 import { FloatingPanel } from "@/components/FloatingPanel";
 import { allLeafKeys } from "@/lib/map-filter";
+import {
+  getEventById,
+  getOrganizationById,
+  getPersonById,
+  getPlaceById,
+} from "@/data/mock-data";
 import type { SearchResult } from "@/lib/search";
-import type { MapEntity } from "@/types/entities";
+import type { GeoPoint, MapEntity } from "@/types/entities";
 
-export default function Home() {
+function resolveFocus(
+  focus: string | null,
+): { entity: MapEntity; location: GeoPoint } | null {
+  if (!focus) return null;
+  const [kind, entityId] = focus.split(":");
+
+  if (kind === "organization") {
+    const organization = getOrganizationById(entityId);
+    if (!organization) return null;
+    return { entity: { kind: "organization", data: organization }, location: organization.location };
+  }
+  if (kind === "place") {
+    const place = getPlaceById(entityId);
+    if (!place) return null;
+    return { entity: { kind: "place", data: place }, location: place.location };
+  }
+  if (kind === "event") {
+    const event = getEventById(entityId);
+    if (!event) return null;
+    return { entity: { kind: "event", data: event }, location: event.location };
+  }
+  if (kind === "person") {
+    const person = getPersonById(entityId);
+    if (!person) return null;
+    const organization = person.organizationIds?.[0]
+      ? getOrganizationById(person.organizationIds[0])
+      : undefined;
+    if (!organization) return null;
+    return { entity: { kind: "person", data: person }, location: organization.location };
+  }
+  return null;
+}
+
+function HomeContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const initialFocus = resolveFocus(searchParams.get("focus"));
+
   const mapRef = useRef<MapHandle>(null);
-  const [selectedEntity, setSelectedEntity] = useState<MapEntity | null>(null);
+  const [selectedEntity, setSelectedEntity] = useState<MapEntity | null>(
+    initialFocus?.entity ?? null,
+  );
   const [filterOpen, setFilterOpen] = useState(false);
   const [enabledLeaves, setEnabledLeaves] = useState<Set<string>>(
     () => new Set(allLeafKeys()),
   );
+
+  useEffect(() => {
+    if (initialFocus) {
+      router.replace("/", { scroll: false });
+    }
+    // Only ever needs to run once, right after mount.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function handleSearchSelect(result: SearchResult) {
     setFilterOpen(false);
@@ -51,6 +105,7 @@ export default function Home() {
       <Map
         ref={mapRef}
         enabledLeaves={enabledLeaves}
+        initialCenter={initialFocus?.location}
         onSelectEntity={handleSelectEntity}
       />
 
@@ -103,5 +158,13 @@ export default function Home() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={null}>
+      <HomeContent />
+    </Suspense>
   );
 }

@@ -67,11 +67,12 @@ function createMarkerElement(
 
 interface MapProps {
   enabledLeaves: Set<string>;
+  initialCenter?: GeoPoint;
   onSelectEntity?: (entity: MapEntity) => void;
 }
 
 const Map = forwardRef<MapHandle, MapProps>(function Map(
-  { enabledLeaves, onSelectEntity },
+  { enabledLeaves, initialCenter, onSelectEntity },
   ref,
 ) {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -79,6 +80,8 @@ const Map = forwardRef<MapHandle, MapProps>(function Map(
   const markersRef = useRef<mapboxgl.Marker[]>([]);
   const onSelectEntityRef = useRef(onSelectEntity);
   onSelectEntityRef.current = onSelectEntity;
+  // Only read at mount time, matching mapboxgl's own one-shot constructor options.
+  const initialCenterRef = useRef(initialCenter);
   const [error, setError] = useState<string | null>(null);
   const [mapReady, setMapReady] = useState(false);
 
@@ -104,11 +107,13 @@ const Map = forwardRef<MapHandle, MapProps>(function Map(
 
     mapboxgl.accessToken = token;
 
+    const initial = initialCenterRef.current;
+
     const map = new mapboxgl.Map({
       container: containerRef.current,
       style: MAP_STYLE,
-      center: TORONTO_CENTER,
-      zoom: DEFAULT_ZOOM,
+      center: initial ? [initial.lng, initial.lat] : TORONTO_CENTER,
+      zoom: initial ? FLY_TO_ZOOM : DEFAULT_ZOOM,
       pitch: DEFAULT_PITCH,
       bearing: DEFAULT_BEARING,
       antialias: true,
