@@ -98,10 +98,14 @@ export interface Event extends BaseEntity {
 
 export type ContentCategory = "Video" | "Image" | "Livestream";
 
+export interface ContentLink {
+  platform: string;
+  url: string;
+}
+
 export interface Content extends BaseEntity {
   category: ContentCategory;
-  platform?: string;
-  url?: string;
+  links: ContentLink[];
   publishedAt: string;
   relatedOrganizationIds?: string[];
   relatedEventIds?: string[];

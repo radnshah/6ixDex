@@ -12,12 +12,14 @@ export function EntityListView<T extends ListItem>({
   kind,
   items,
   renderMeta,
+  renderMedia,
   linkToMap = true,
 }: {
   title: string;
   kind: string;
   items: T[];
   renderMeta: (item: T) => ReactNode;
+  renderMedia?: (item: T) => ReactNode;
   linkToMap?: boolean;
 }) {
   return (
@@ -34,6 +36,7 @@ export function EntityListView<T extends ListItem>({
               <FloatingPanel
                 className={`p-4 ${linkToMap ? "transition-colors hover:bg-white/10" : ""}`}
               >
+                {renderMedia?.(item)}
                 <h2 className="text-sm font-semibold text-zinc-50">
                   {item.name}
                 </h2>

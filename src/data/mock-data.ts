@@ -223,8 +223,19 @@ export const CONTENT: Content[] = [
     entityId: "content-northbound-demo",
     name: "Northbound Robotics: sidewalk delivery demo",
     category: "Video",
-    platform: "YouTube",
-    url: "https://youtube.com/watch?v=example-northbound-demo",
+    // Cross-posted to multiple platforms — each gets its own button, and
+    // whichever ones have live API access (YouTube, TikTok) show real data.
+    links: [
+      { platform: "YouTube", url: "https://youtube.com/watch?v=jNQXAC9IVRw" },
+      {
+        platform: "TikTok",
+        url: "https://www.tiktok.com/@scout2015/video/6718335390845095173",
+      },
+      {
+        platform: "Instagram",
+        url: "https://instagram.com/p/example-northbound-demo",
+      },
+    ],
     publishedAt: "2026-06-02",
     relatedOrganizationIds: ["org-northbound-robotics"],
   },
@@ -232,8 +243,12 @@ export const CONTENT: Content[] = [
     entityId: "content-hackathon-recap",
     name: "AI Builders Hackathon recap",
     category: "Image",
-    platform: "Instagram",
-    url: "https://instagram.com/p/example-hackathon-recap",
+    links: [
+      {
+        platform: "Instagram",
+        url: "https://instagram.com/p/example-hackathon-recap",
+      },
+    ],
     publishedAt: "2026-08-16",
     relatedEventIds: ["event-ai-builders-hackathon"],
   },
@@ -241,16 +256,24 @@ export const CONTENT: Content[] = [
     entityId: "content-build-session",
     name: "Live build session: shipping the search bar",
     category: "Livestream",
-    platform: "Twitch",
-    url: "https://twitch.tv/example-build-session",
+    links: [
+      {
+        platform: "Twitch",
+        url: "https://www.twitch.tv/twitch/clip/CrispyJollyGullHassaanChop-nPlLKGxGRcBj37e4",
+      },
+    ],
     publishedAt: "2026-07-10",
   },
   {
     entityId: "content-founder-interview",
     name: "Founder interview: Marcus Chen on embedded ledgers",
     category: "Video",
-    platform: "LinkedIn",
-    url: "https://linkedin.com/posts/example-founder-interview",
+    links: [
+      {
+        platform: "LinkedIn",
+        url: "https://linkedin.com/posts/example-founder-interview",
+      },
+    ],
     publishedAt: "2026-09-11",
     relatedOrganizationIds: ["org-ledgerly"],
     relatedEventIds: ["event-tech-week-meetup"],
