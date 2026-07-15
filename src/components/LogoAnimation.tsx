@@ -1,34 +1,25 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { Orbitron } from "next/font/google";
-import styles from "./LogoAnimation.module.css";
-
-const orbitron = Orbitron({
-  subsets: ["latin"],
-  weight: ["700", "900"],
-});
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { LogoMark } from "./LogoMark";
 
 export function LogoAnimation() {
-  const logoRef = useRef<HTMLDivElement>(null);
+  const [play, setPlay] = useState(false);
 
   useEffect(() => {
-    const el = logoRef.current;
-    if (!el) return;
-    const timeout = setTimeout(() => {
-      el.classList.add(styles.play);
-    }, 200);
+    const timeout = setTimeout(() => setPlay(true), 100);
     return () => clearTimeout(timeout);
   }, []);
 
   return (
     <div className="pointer-events-none fixed left-4 top-4 z-40 sm:left-6 sm:top-6">
-      <div ref={logoRef} className={`${styles.logo} ${orbitron.className}`}>
-        <span className={styles.letter}>6</span>
-        <span className={`${styles.grow} ${styles.ix}`}>IX</span>
-        <span className={styles.d}>D</span>
-        <span className={`${styles.grow} ${styles.ex}`}>EX</span>
-      </div>
+      <motion.div
+        layoutId="brand-logo"
+        transition={{ duration: 0.5 }}
+      >
+        <LogoMark play={play} size={28} />
+      </motion.div>
     </div>
   );
 }

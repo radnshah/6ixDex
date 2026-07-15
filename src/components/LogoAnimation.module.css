@@ -19,7 +19,7 @@
   display: inline-block;
   color: #ffffff;
   margin-left: -0.09em;
-  clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 28% 100%, 28% 30%, 0% 30%);
+  clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 28% 100%, 28% 32%, 0% 32%);
 }
 
 .grow {
