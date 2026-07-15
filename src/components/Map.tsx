@@ -19,6 +19,11 @@ import {
 } from "@/lib/mapbox-config";
 import { ORGANIZATIONS, PLACES, EVENTS } from "@/data/mock-data";
 import { ENTITY_COLORS } from "@/lib/labels";
+import {
+  isEventVisible,
+  isOrganizationVisible,
+  isPlaceVisible,
+} from "@/lib/map-filter";
 import type { GeoPoint, MapEntity } from "@/types/entities";
 
 export interface MapHandle {
@@ -60,16 +65,22 @@ function createMarkerElement(
   return root;
 }
 
-const Map = forwardRef<
-  MapHandle,
-  { onSelectEntity?: (entity: MapEntity) => void }
->(function Map({ onSelectEntity }, ref) {
+interface MapProps {
+  enabledLeaves: Set<string>;
+  onSelectEntity?: (entity: MapEntity) => void;
+}
+
+const Map = forwardRef<MapHandle, MapProps>(function Map(
+  { enabledLeaves, onSelectEntity },
+  ref,
+) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
   const onSelectEntityRef = useRef(onSelectEntity);
   onSelectEntityRef.current = onSelectEntity;
   const [error, setError] = useState<string | null>(null);
+  const [mapReady, setMapReady] = useState(false);
 
   useImperativeHandle(ref, () => ({
     flyTo(location: GeoPoint) {
@@ -150,7 +161,26 @@ const Map = forwardRef<
       );
     });
 
+    mapRef.current = map;
+    setMapReady(true);
+
+    return () => {
+      map.remove();
+      mapRef.current = null;
+      setMapReady(false);
+    };
+  }, []);
+
+  // Re-syncs markers whenever the active filter set changes.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapReady) return;
+
+    for (const marker of markersRef.current) marker.remove();
+    markersRef.current = [];
+
     for (const place of PLACES) {
+      if (!isPlaceVisible(place, enabledLeaves)) continue;
       const el = createMarkerElement(ENTITY_COLORS.place, true, "place");
       el.addEventListener("click", (e) => {
         e.stopPropagation();
@@ -163,6 +193,7 @@ const Map = forwardRef<
     }
 
     for (const event of EVENTS) {
+      if (!isEventVisible(event, enabledLeaves)) continue;
       const el = createMarkerElement(ENTITY_COLORS.event, true, "event");
       el.addEventListener("click", (e) => {
         e.stopPropagation();
@@ -175,6 +206,7 @@ const Map = forwardRef<
     }
 
     for (const organization of ORGANIZATIONS) {
+      if (!isOrganizationVisible(organization, enabledLeaves)) continue;
       const el = createMarkerElement(
         ENTITY_COLORS.organization,
         true,
@@ -190,15 +222,11 @@ const Map = forwardRef<
       markersRef.current.push(marker);
     }
 
-    mapRef.current = map;
-
     return () => {
       for (const marker of markersRef.current) marker.remove();
       markersRef.current = [];
-      map.remove();
-      mapRef.current = null;
     };
-  }, []);
+  }, [enabledLeaves, mapReady]);
 
   if (error) {
     return (
