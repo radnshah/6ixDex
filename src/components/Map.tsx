@@ -11,10 +11,58 @@ import {
   MAP_STYLE,
   BUILDINGS_MIN_ZOOM,
 } from "@/lib/mapbox-config";
+import { COMPANIES, PLACES, EVENTS } from "@/data/mock-data";
+import type { Company } from "@/types/entities";
 
-export default function Map() {
+const MARKER_COLORS = {
+  company: "#22d3ee",
+  place: "#a78bfa",
+  event: "#fbbf24",
+} as const;
+
+function createMarkerElement(
+  color: string,
+  interactive: boolean,
+  kind: string,
+) {
+  // Mapbox positions this root element via its own CSS transform, so the
+  // hover scale effect is applied to an inner child instead of overwriting it.
+  const root = document.createElement("div");
+  root.className = `entity-marker entity-marker-${kind}`;
+  root.style.width = "12px";
+  root.style.height = "12px";
+  root.style.cursor = interactive ? "pointer" : "default";
+
+  const dot = document.createElement("div");
+  dot.style.width = "100%";
+  dot.style.height = "100%";
+  dot.style.borderRadius = "9999px";
+  dot.style.background = color;
+  dot.style.border = "1px solid rgba(255,255,255,0.5)";
+  dot.style.boxShadow = `0 0 12px 4px ${color}66`;
+  dot.style.transition = "transform 0.15s ease-out";
+
+  root.addEventListener("mouseenter", () => {
+    dot.style.transform = "scale(1.4)";
+  });
+  root.addEventListener("mouseleave", () => {
+    dot.style.transform = "scale(1)";
+  });
+
+  root.appendChild(dot);
+  return root;
+}
+
+export default function Map({
+  onSelectCompany,
+}: {
+  onSelectCompany?: (company: Company) => void;
+}) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
+  const markersRef = useRef<mapboxgl.Marker[]>([]);
+  const onSelectCompanyRef = useRef(onSelectCompany);
+  onSelectCompanyRef.current = onSelectCompany;
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -86,9 +134,39 @@ export default function Map() {
       );
     });
 
+    for (const place of PLACES) {
+      const el = createMarkerElement(MARKER_COLORS.place, false, "place");
+      const marker = new mapboxgl.Marker({ element: el })
+        .setLngLat([place.location.lng, place.location.lat])
+        .addTo(map);
+      markersRef.current.push(marker);
+    }
+
+    for (const event of EVENTS) {
+      const el = createMarkerElement(MARKER_COLORS.event, false, "event");
+      const marker = new mapboxgl.Marker({ element: el })
+        .setLngLat([event.location.lng, event.location.lat])
+        .addTo(map);
+      markersRef.current.push(marker);
+    }
+
+    for (const company of COMPANIES) {
+      const el = createMarkerElement(MARKER_COLORS.company, true, "company");
+      el.addEventListener("click", (e) => {
+        e.stopPropagation();
+        onSelectCompanyRef.current?.(company);
+      });
+      const marker = new mapboxgl.Marker({ element: el })
+        .setLngLat([company.location.lng, company.location.lat])
+        .addTo(map);
+      markersRef.current.push(marker);
+    }
+
     mapRef.current = map;
 
     return () => {
+      for (const marker of markersRef.current) marker.remove();
+      markersRef.current = [];
       map.remove();
       mapRef.current = null;
     };
