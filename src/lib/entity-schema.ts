@@ -5,6 +5,17 @@ import {
 } from "./taxonomy";
 import type { EntityTypeKey } from "./db";
 
+// Maps the singular "kind" used throughout the UI (MapEntity.kind, browse
+// page `kind` props) to the plural key the API/db layer uses.
+export const KIND_TO_API_TYPE: Record<string, EntityTypeKey> = {
+  organization: "organizations",
+  person: "people",
+  place: "places",
+  event: "events",
+  content: "content",
+  journal: "journal",
+};
+
 export type FieldType =
   | "text"
   | "textarea"
