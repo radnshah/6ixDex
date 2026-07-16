@@ -1,10 +1,4 @@
-import {
-  ORGANIZATIONS,
-  PEOPLE,
-  PLACES,
-  EVENTS,
-  getOrganizationById,
-} from "@/data/mock-data";
+import type { EntityData } from "./use-entity-data";
 import type { GeoPoint, MapEntity } from "@/types/entities";
 
 export interface SearchResult {
@@ -15,10 +9,13 @@ export interface SearchResult {
   entity: MapEntity;
 }
 
-function buildSearchIndex(): SearchResult[] {
+function buildSearchIndex(data: EntityData): SearchResult[] {
   const results: SearchResult[] = [];
+  const organizationById = new Map(
+    data.organizations.map((organization) => [organization.entityId, organization]),
+  );
 
-  for (const organization of ORGANIZATIONS) {
+  for (const organization of data.organizations) {
     results.push({
       id: organization.entityId,
       name: organization.name,
@@ -28,9 +25,9 @@ function buildSearchIndex(): SearchResult[] {
     });
   }
 
-  for (const person of PEOPLE) {
+  for (const person of data.people) {
     const organization = person.organizationIds?.[0]
-      ? getOrganizationById(person.organizationIds[0])
+      ? organizationById.get(person.organizationIds[0])
       : undefined;
     if (!organization) continue;
     results.push({
@@ -42,7 +39,7 @@ function buildSearchIndex(): SearchResult[] {
     });
   }
 
-  for (const place of PLACES) {
+  for (const place of data.places) {
     results.push({
       id: place.entityId,
       name: place.name,
@@ -52,7 +49,7 @@ function buildSearchIndex(): SearchResult[] {
     });
   }
 
-  for (const event of EVENTS) {
+  for (const event of data.events) {
     results.push({
       id: event.entityId,
       name: event.name,
@@ -65,15 +62,19 @@ function buildSearchIndex(): SearchResult[] {
   return results;
 }
 
-const SEARCH_INDEX = buildSearchIndex();
-
-export function searchEntities(query: string, limit = 8): SearchResult[] {
+export function searchEntities(
+  data: EntityData,
+  query: string,
+  limit = 8,
+): SearchResult[] {
   const normalized = query.trim().toLowerCase();
   if (!normalized) return [];
 
-  return SEARCH_INDEX.filter(
-    (result) =>
-      result.name.toLowerCase().includes(normalized) ||
-      result.subtitle.toLowerCase().includes(normalized),
-  ).slice(0, limit);
+  return buildSearchIndex(data)
+    .filter(
+      (result) =>
+        result.name.toLowerCase().includes(normalized) ||
+        result.subtitle.toLowerCase().includes(normalized),
+    )
+    .slice(0, limit);
 }

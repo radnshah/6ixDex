@@ -17,14 +17,19 @@ import {
   MAP_STYLE,
   BUILDINGS_MIN_ZOOM,
 } from "@/lib/mapbox-config";
-import { ORGANIZATIONS, PLACES, EVENTS } from "@/data/mock-data";
 import { ENTITY_COLORS } from "@/lib/labels";
 import {
   isEventVisible,
   isOrganizationVisible,
   isPlaceVisible,
 } from "@/lib/map-filter";
-import type { GeoPoint, MapEntity } from "@/types/entities";
+import type {
+  Event,
+  GeoPoint,
+  MapEntity,
+  Organization,
+  Place,
+} from "@/types/entities";
 
 export interface MapHandle {
   flyTo: (location: GeoPoint) => void;
@@ -66,13 +71,16 @@ function createMarkerElement(
 }
 
 interface MapProps {
+  organizations: Organization[];
+  places: Place[];
+  events: Event[];
   enabledLeaves: Set<string>;
   initialCenter?: GeoPoint;
   onSelectEntity?: (entity: MapEntity) => void;
 }
 
 const Map = forwardRef<MapHandle, MapProps>(function Map(
-  { enabledLeaves, initialCenter, onSelectEntity },
+  { organizations, places, events, enabledLeaves, initialCenter, onSelectEntity },
   ref,
 ) {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -184,7 +192,7 @@ const Map = forwardRef<MapHandle, MapProps>(function Map(
     for (const marker of markersRef.current) marker.remove();
     markersRef.current = [];
 
-    for (const place of PLACES) {
+    for (const place of places) {
       if (!isPlaceVisible(place, enabledLeaves)) continue;
       const el = createMarkerElement(ENTITY_COLORS.place, true, "place");
       el.addEventListener("click", (e) => {
@@ -197,7 +205,7 @@ const Map = forwardRef<MapHandle, MapProps>(function Map(
       markersRef.current.push(marker);
     }
 
-    for (const event of EVENTS) {
+    for (const event of events) {
       if (!isEventVisible(event, enabledLeaves)) continue;
       const el = createMarkerElement(ENTITY_COLORS.event, true, "event");
       el.addEventListener("click", (e) => {
@@ -210,7 +218,7 @@ const Map = forwardRef<MapHandle, MapProps>(function Map(
       markersRef.current.push(marker);
     }
 
-    for (const organization of ORGANIZATIONS) {
+    for (const organization of organizations) {
       if (!isOrganizationVisible(organization, enabledLeaves)) continue;
       const el = createMarkerElement(
         ENTITY_COLORS.organization,
@@ -231,7 +239,7 @@ const Map = forwardRef<MapHandle, MapProps>(function Map(
       for (const marker of markersRef.current) marker.remove();
       markersRef.current = [];
     };
-  }, [enabledLeaves, mapReady]);
+  }, [organizations, places, events, enabledLeaves, mapReady]);
 
   if (error) {
     return (

@@ -4,14 +4,17 @@ import { useMemo, useState } from "react";
 import { FloatingPanel } from "./FloatingPanel";
 import { searchEntities, type SearchResult } from "@/lib/search";
 import { ENTITY_COLORS } from "@/lib/labels";
+import type { EntityData } from "@/lib/use-entity-data";
 
 export function SearchBar({
+  data,
   onSelectResult,
 }: {
+  data: EntityData;
   onSelectResult: (result: SearchResult) => void;
 }) {
   const [query, setQuery] = useState("");
-  const results = useMemo(() => searchEntities(query), [query]);
+  const results = useMemo(() => searchEntities(data, query), [data, query]);
 
   function handleSelect(result: SearchResult) {
     onSelectResult(result);

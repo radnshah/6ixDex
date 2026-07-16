@@ -1,19 +1,10 @@
-import { JOURNAL } from "@/data/mock-data";
+import { listEntities } from "@/lib/db";
 import { EntityListView } from "@/components/EntityListView";
 
-export default function JournalPage() {
-  return (
-    <EntityListView
-      title="Journal"
-      kind="journal"
-      items={JOURNAL}
-      linkToMap={false}
-      renderMeta={(entry) => (
-        <div>
-          <p className="mb-1.5">{[entry.category, entry.date].join(" · ")}</p>
-          <p className="text-zinc-300">{entry.body}</p>
-        </div>
-      )}
-    />
-  );
+export const dynamic = "force-dynamic";
+
+export default async function JournalPage() {
+  const journal = await listEntities("journal");
+
+  return <EntityListView title="Journal" kind="journal" items={journal} linkToMap={false} />;
 }

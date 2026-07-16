@@ -1,12 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import { FloatingPanel } from "./FloatingPanel";
-import {
-  getEventById,
-  getOrganizationById,
-  getPersonById,
-  getPlaceById,
-} from "@/data/mock-data";
+import { EntityFormModal } from "./EntityFormModal";
+import { KIND_TO_API_TYPE } from "@/lib/entity-schema";
+import type { EntityData } from "@/lib/use-entity-data";
 import type {
   Event,
   MapEntity,
@@ -39,16 +37,22 @@ function SectionLabel({ children }: { children: string }) {
   );
 }
 
-function OrganizationBody({ organization }: { organization: Organization }) {
+function OrganizationBody({
+  organization,
+  data,
+}: {
+  organization: Organization;
+  data: EntityData;
+}) {
   const founders = (organization.founderIds ?? [])
-    .map(getPersonById)
-    .filter((person) => person !== undefined);
+    .map((id) => data.people.find((person) => person.entityId === id))
+    .filter((person): person is Person => person !== undefined);
   const place = organization.placeId
-    ? getPlaceById(organization.placeId)
+    ? data.places.find((p) => p.entityId === organization.placeId)
     : undefined;
-  const events = (organization.eventIds ?? [])
-    .map(getEventById)
-    .filter((event) => event !== undefined);
+  const relatedEvents = (organization.eventIds ?? [])
+    .map((id) => data.events.find((event) => event.entityId === id))
+    .filter((event): event is Event => event !== undefined);
 
   const facts = [
     { label: "Stage", value: organization.stage },
@@ -118,11 +122,11 @@ function OrganizationBody({ organization }: { organization: Organization }) {
         </div>
       )}
 
-      {events.length > 0 && (
+      {relatedEvents.length > 0 && (
         <div className="mt-4">
           <SectionLabel>Events</SectionLabel>
           <ul className="mt-1.5 space-y-1">
-            {events.map((event) => (
+            {relatedEvents.map((event) => (
               <li key={event.entityId} className="text-sm text-zinc-200">
                 {event.name}{" "}
                 <span className="text-zinc-500">— {event.date}</span>
@@ -160,9 +164,9 @@ function OrganizationBody({ organization }: { organization: Organization }) {
   );
 }
 
-function PersonBody({ person }: { person: Person }) {
+function PersonBody({ person, data }: { person: Person; data: EntityData }) {
   const organization = person.organizationIds?.[0]
-    ? getOrganizationById(person.organizationIds[0])
+    ? data.organizations.find((o) => o.entityId === person.organizationIds![0])
     : undefined;
 
   return (
@@ -205,10 +209,10 @@ function PlaceBody({ place }: { place: Place }) {
   );
 }
 
-function EventBody({ event }: { event: Event }) {
+function EventBody({ event, data }: { event: Event; data: EntityData }) {
   const organizations = (event.organizationIds ?? [])
-    .map(getOrganizationById)
-    .filter((organization) => organization !== undefined);
+    .map((id) => data.organizations.find((o) => o.entityId === id))
+    .filter((organization): organization is Organization => organization !== undefined);
 
   return (
     <>
@@ -234,14 +238,32 @@ function EventBody({ event }: { event: Event }) {
   );
 }
 
+function EditIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2}>
+      <path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+    </svg>
+  );
+}
+
 export function EntityPanel({
   entity,
+  data,
   onClose,
+  onChanged,
 }: {
   entity: MapEntity;
+  data: EntityData;
   onClose: () => void;
+  onChanged: () => void;
 }) {
   const { title, subtitle } = getHeaderInfo(entity);
+  const [editing, setEditing] = useState(false);
+
+  function handleSaved() {
+    setEditing(false);
+    onChanged();
+  }
 
   return (
     <FloatingPanel className="pointer-events-auto w-full max-w-sm p-5">
@@ -252,29 +274,48 @@ export function EntityPanel({
             {subtitle}
           </p>
         </div>
-        <button
-          onClick={onClose}
-          aria-label="Close"
-          className="rounded-full p-1 text-zinc-400 transition-colors hover:bg-white/10 hover:text-zinc-100"
-        >
-          <svg
-            viewBox="0 0 24 24"
-            className="h-4 w-4"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2}
+        <div className="flex shrink-0 gap-1">
+          <button
+            onClick={() => setEditing(true)}
+            aria-label="Edit"
+            className="rounded-full p-1 text-zinc-400 transition-colors hover:bg-white/10 hover:text-zinc-100"
           >
-            <path d="M18 6 6 18M6 6l12 12" />
-          </svg>
-        </button>
+            <EditIcon />
+          </button>
+          <button
+            onClick={onClose}
+            aria-label="Close"
+            className="rounded-full p-1 text-zinc-400 transition-colors hover:bg-white/10 hover:text-zinc-100"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              className="h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path d="M18 6 6 18M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
       </div>
 
       {entity.kind === "organization" && (
-        <OrganizationBody organization={entity.data} />
+        <OrganizationBody organization={entity.data} data={data} />
       )}
-      {entity.kind === "person" && <PersonBody person={entity.data} />}
+      {entity.kind === "person" && <PersonBody person={entity.data} data={data} />}
       {entity.kind === "place" && <PlaceBody place={entity.data} />}
-      {entity.kind === "event" && <EventBody event={entity.data} />}
+      {entity.kind === "event" && <EventBody event={entity.data} data={data} />}
+
+      {editing && (
+        <EntityFormModal
+          apiType={KIND_TO_API_TYPE[entity.kind]}
+          entityId={entity.data.entityId}
+          initialData={entity.data as unknown as Record<string, unknown>}
+          onClose={() => setEditing(false)}
+          onSaved={handleSaved}
+        />
+      )}
     </FloatingPanel>
   );
 }

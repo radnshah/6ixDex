@@ -1,15 +1,10 @@
-import { PLACES } from "@/data/mock-data";
+import { listEntities } from "@/lib/db";
 import { EntityListView } from "@/components/EntityListView";
 
-export default function PlacesPage() {
-  return (
-    <EntityListView
-      title="Places"
-      kind="place"
-      items={PLACES}
-      renderMeta={(place) =>
-        [place.category, place.subtype, place.address].filter(Boolean).join(" · ")
-      }
-    />
-  );
+export const dynamic = "force-dynamic";
+
+export default async function PlacesPage() {
+  const places = await listEntities("places");
+
+  return <EntityListView title="Places" kind="place" items={places} />;
 }
