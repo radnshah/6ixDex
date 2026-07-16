@@ -1,5 +1,4 @@
-import fs from "fs/promises";
-import path from "path";
+import { PrismaClient } from "@/generated/prisma/client";
 import type {
   Content,
   Event,
@@ -9,18 +8,28 @@ import type {
   Place,
 } from "@/types/entities";
 
-const DB_PATH = path.join(process.cwd(), "data", "db.json");
+// Reuse a single PrismaClient across Next.js dev hot-reloads instead of
+// opening a fresh connection pool on every module reload.
+const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
+const prisma = globalForPrisma.prisma ?? new PrismaClient();
+if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
 
-interface Db {
-  organizations: Organization[];
-  people: Person[];
-  places: Place[];
-  events: Event[];
-  content: Content[];
-  journal: Journal[];
+export type EntityTypeKey =
+  | "organizations"
+  | "people"
+  | "places"
+  | "events"
+  | "content"
+  | "journal";
+
+interface EntityTypeMap {
+  organizations: Organization;
+  people: Person;
+  places: Place;
+  events: Event;
+  content: Content;
+  journal: Journal;
 }
-
-export type EntityTypeKey = keyof Db;
 
 const ID_PREFIXES: Record<EntityTypeKey, string> = {
   organizations: "org",
@@ -31,30 +40,47 @@ const ID_PREFIXES: Record<EntityTypeKey, string> = {
   journal: "journal",
 };
 
-async function readDb(): Promise<Db> {
-  const raw = await fs.readFile(DB_PATH, "utf-8");
-  return JSON.parse(raw);
+// These entity types store location as separate lat/lng columns; the app
+// shape nests them as `location: { lat, lng }`.
+const LOCATION_TYPES = new Set<EntityTypeKey>(["organizations", "places", "events"]);
+
+function toApp(
+  type: EntityTypeKey,
+  row: Record<string, unknown>,
+): Record<string, unknown> {
+  if (!LOCATION_TYPES.has(type)) return row;
+  const { lat, lng, ...rest } = row;
+  return { ...rest, location: { lat, lng } };
 }
 
-async function writeDb(db: Db): Promise<void> {
-  await fs.writeFile(DB_PATH, JSON.stringify(db, null, 2), "utf-8");
+function toDb(
+  type: EntityTypeKey,
+  data: Record<string, unknown>,
+): Record<string, unknown> {
+  if (!LOCATION_TYPES.has(type) || !("location" in data)) return data;
+  const { location, ...rest } = data as {
+    location: { lat: number; lng: number };
+    [key: string]: unknown;
+  };
+  return { ...rest, lat: location.lat, lng: location.lng };
 }
 
-export async function listEntities<K extends EntityTypeKey>(
-  type: K,
-): Promise<Db[K]> {
-  const db = await readDb();
-  return db[type];
-}
-
-export async function getEntity<K extends EntityTypeKey>(
-  type: K,
-  entityId: string,
-): Promise<Db[K][number] | undefined> {
-  const list = await listEntities(type);
-  return (list as { entityId: string }[]).find(
-    (entity) => entity.entityId === entityId,
-  ) as Db[K][number] | undefined;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function getModel(type: EntityTypeKey): any {
+  switch (type) {
+    case "organizations":
+      return prisma.organization;
+    case "people":
+      return prisma.person;
+    case "places":
+      return prisma.place;
+    case "events":
+      return prisma.event;
+    case "content":
+      return prisma.content;
+    case "journal":
+      return prisma.journal;
+  }
 }
 
 function generateEntityId(type: EntityTypeKey, name: string): string {
@@ -68,16 +94,29 @@ function generateEntityId(type: EntityTypeKey, name: string): string {
   return `${ID_PREFIXES[type]}-${slug || "entry"}-${suffix}`;
 }
 
+export async function listEntities<K extends EntityTypeKey>(
+  type: K,
+): Promise<EntityTypeMap[K][]> {
+  const rows = await getModel(type).findMany();
+  return rows.map((row: Record<string, unknown>) => toApp(type, row)) as EntityTypeMap[K][];
+}
+
+export async function getEntity<K extends EntityTypeKey>(
+  type: K,
+  entityId: string,
+): Promise<EntityTypeMap[K] | undefined> {
+  const row = await getModel(type).findUnique({ where: { entityId } });
+  return row ? (toApp(type, row) as unknown as EntityTypeMap[K]) : undefined;
+}
+
 export async function createEntity(
   type: EntityTypeKey,
   data: Record<string, unknown>,
 ): Promise<Record<string, unknown>> {
-  const db = await readDb();
   const entityId = generateEntityId(type, String(data.name ?? "entry"));
-  const entity = { ...data, entityId };
-  (db[type] as unknown as Record<string, unknown>[]).push(entity);
-  await writeDb(db);
-  return entity;
+  const record = { ...toDb(type, data), entityId };
+  const created = await getModel(type).create({ data: record });
+  return toApp(type, created);
 }
 
 export async function updateEntity(
@@ -85,25 +124,25 @@ export async function updateEntity(
   entityId: string,
   data: Record<string, unknown>,
 ): Promise<Record<string, unknown> | undefined> {
-  const db = await readDb();
-  const list = db[type] as unknown as Record<string, unknown>[];
-  const index = list.findIndex((entity) => entity.entityId === entityId);
-  if (index === -1) return undefined;
-  const updated = { ...list[index], ...data, entityId };
-  list[index] = updated;
-  await writeDb(db);
-  return updated;
+  try {
+    const updated = await getModel(type).update({
+      where: { entityId },
+      data: toDb(type, data),
+    });
+    return toApp(type, updated);
+  } catch {
+    return undefined;
+  }
 }
 
 export async function deleteEntity(
   type: EntityTypeKey,
   entityId: string,
 ): Promise<boolean> {
-  const db = await readDb();
-  const list = db[type] as unknown as Record<string, unknown>[];
-  const index = list.findIndex((entity) => entity.entityId === entityId);
-  if (index === -1) return false;
-  list.splice(index, 1);
-  await writeDb(db);
-  return true;
+  try {
+    await getModel(type).delete({ where: { entityId } });
+    return true;
+  } catch {
+    return false;
+  }
 }

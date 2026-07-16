@@ -1,0 +1,82 @@
+generator client {
+  provider      = "prisma-client"
+  output        = "../src/generated/prisma"
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Organization {
+  entityId      String   @id
+  name          String
+  category      String
+  subtype       String
+  description   String
+  industry      String?
+  lat           Float
+  lng           Float
+  website       String?
+  linkedin      String?
+  founded       Int?
+  employeeCount Int?
+  stage         String?
+  headquarters  String?
+  techStack     String[]
+  aiStack       String[]
+  founderIds    String[]
+  placeId       String?
+  eventIds      String[]
+}
+
+model Person {
+  entityId        String   @id
+  name            String
+  role            String
+  bio             String?
+  linkedin        String?
+  organizationIds String[]
+}
+
+model Place {
+  entityId String  @id
+  name     String
+  category String
+  subtype  String
+  lat      Float
+  lng      Float
+  address  String?
+}
+
+model Event {
+  entityId        String   @id
+  name            String
+  category        String
+  subtype         String?
+  date            String
+  lat             Float
+  lng             Float
+  organizationIds String[]
+}
+
+model Content {
+  entityId               String   @id
+  name                   String
+  category               String
+  links                  Json
+  publishedAt            String
+  relatedOrganizationIds String[]
+  relatedEventIds        String[]
+}
+
+model Journal {
+  entityId               String   @id
+  name                   String
+  category               String
+  body                   String
+  date                   String
+  relatedOrganizationIds String[]
+  relatedEventIds        String[]
+}
