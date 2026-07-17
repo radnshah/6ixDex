@@ -13,7 +13,19 @@ interface Suggestion {
   createdAt: string | Date;
 }
 
-export function SuggestionsInbox({ suggestions }: { suggestions: Suggestion[] }) {
+interface WaitlistEntry {
+  id: string;
+  email: string;
+  createdAt: string | Date;
+}
+
+export function SuggestionsInbox({
+  suggestions,
+  waitlist,
+}: {
+  suggestions: Suggestion[];
+  waitlist: WaitlistEntry[];
+}) {
   const router = useRouter();
   const [pendingId, setPendingId] = useState<string | null>(null);
 
@@ -88,6 +100,26 @@ export function SuggestionsInbox({ suggestions }: { suggestions: Suggestion[] })
                   </button>
                 </div>
               </div>
+            </FloatingPanel>
+          ))}
+        </div>
+
+        <h2 className="mt-10 text-lg font-semibold">Waitlist</h2>
+        <p className="mt-1 text-sm text-zinc-500">{waitlist.length} signed up</p>
+
+        <div className="mt-4 space-y-2">
+          {waitlist.length === 0 && (
+            <p className="text-sm text-zinc-500">No signups yet.</p>
+          )}
+          {waitlist.map((entry) => (
+            <FloatingPanel
+              key={entry.id}
+              className="flex items-center justify-between p-3"
+            >
+              <span className="text-sm text-zinc-200">{entry.email}</span>
+              <span className="text-xs text-zinc-600">
+                {new Date(entry.createdAt).toLocaleDateString()}
+              </span>
             </FloatingPanel>
           ))}
         </div>

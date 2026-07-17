@@ -9,9 +9,10 @@ export default async function SuggestionsPage() {
   const admin = await isAdmin();
   if (!admin) redirect("/");
 
-  const suggestions = await prisma.suggestion.findMany({
-    orderBy: { createdAt: "desc" },
-  });
+  const [suggestions, waitlist] = await Promise.all([
+    prisma.suggestion.findMany({ orderBy: { createdAt: "desc" } }),
+    prisma.waitlistEntry.findMany({ orderBy: { createdAt: "desc" } }),
+  ]);
 
-  return <SuggestionsInbox suggestions={suggestions} />;
+  return <SuggestionsInbox suggestions={suggestions} waitlist={waitlist} />;
 }

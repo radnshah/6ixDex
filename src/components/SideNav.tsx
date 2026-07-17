@@ -203,8 +203,12 @@ export function SideNav() {
               </button>
             ) : (
               <Link
-                href="/login"
-                className="flex flex-col items-center gap-1 rounded-xl px-3 py-2 text-zinc-400 transition-colors hover:bg-white/5 hover:text-zinc-100"
+                href="/waitlist"
+                className={`flex flex-col items-center gap-1 rounded-xl px-3 py-2 transition-colors ${
+                  pathname === "/waitlist"
+                    ? "bg-white/10 text-cyan-400"
+                    : "text-zinc-400 hover:bg-white/5 hover:text-zinc-100"
+                }`}
               >
                 <svg
                   viewBox="0 0 24 24"
@@ -215,10 +219,10 @@ export function SideNav() {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 >
-                  <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
-                  <path d="M10 17l5-5-5-5M15 12H3" />
+                  <path d="M22 6 12 13 2 6" />
+                  <rect x="2" y="4" width="20" height="16" rx="2" />
                 </svg>
-                <span className="text-[10px] font-medium">Log in</span>
+                <span className="text-[10px] font-medium">Waitlist</span>
               </Link>
             )}
           </>
