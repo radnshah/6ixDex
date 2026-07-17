@@ -1,10 +1,11 @@
 import { getEntity, listEntities } from "@/lib/db";
+import { isAdmin } from "@/lib/auth";
 import { EntityListView } from "@/components/EntityListView";
 
 export const dynamic = "force-dynamic";
 
 export default async function PeoplePage() {
-  const people = await listEntities("people");
+  const [people, admin] = await Promise.all([listEntities("people"), isAdmin()]);
   const organizationNameById = new Map<string, string>();
   await Promise.all(
     people.map(async (person) => {
@@ -22,5 +23,5 @@ export default async function PeoplePage() {
       : undefined,
   }));
 
-  return <EntityListView title="People" kind="person" items={items} />;
+  return <EntityListView title="People" kind="person" items={items} isAdmin={admin} />;
 }

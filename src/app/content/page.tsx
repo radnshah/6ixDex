@@ -1,4 +1,5 @@
 import { listEntities } from "@/lib/db";
+import { isAdmin } from "@/lib/auth";
 import { EntityListView } from "@/components/EntityListView";
 import { fetchEnrichment } from "@/lib/social-enrichment";
 
@@ -13,7 +14,7 @@ function formatCount(count: number): string {
 }
 
 export default async function ContentPage() {
-  const content = await listEntities("content");
+  const [content, admin] = await Promise.all([listEntities("content"), isAdmin()]);
 
   const items = await Promise.all(
     content.map(async (item) => {
@@ -39,6 +40,12 @@ export default async function ContentPage() {
   );
 
   return (
-    <EntityListView title="Content" kind="content" items={items} linkToMap={false} />
+    <EntityListView
+      title="Content"
+      kind="content"
+      items={items}
+      linkToMap={false}
+      isAdmin={admin}
+    />
   );
 }

@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import { FloatingPanel } from "./FloatingPanel";
 import { EntityFormModal } from "./EntityFormModal";
 import { KIND_TO_API_TYPE } from "@/lib/entity-schema";
-import { useCurrentUser } from "@/lib/use-current-user";
 
 interface ListItem {
   entityId: string;
@@ -110,16 +109,17 @@ export function EntityListView<T extends ListItem>({
   kind,
   items,
   linkToMap = true,
+  isAdmin,
 }: {
   title: string;
   kind: string;
   items: T[];
   linkToMap?: boolean;
+  isAdmin: boolean;
 }) {
   const router = useRouter();
   const apiType = KIND_TO_API_TYPE[kind];
   const [editingItem, setEditingItem] = useState<T | "new" | null>(null);
-  const { isAdmin } = useCurrentUser();
 
   function handleSaved() {
     setEditingItem(null);
