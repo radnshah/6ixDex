@@ -30,6 +30,18 @@ function getHeaderInfo(entity: MapEntity): { title: string; subtitle: string } {
   }
 }
 
+function getHeaderImage(entity: MapEntity): string | undefined {
+  switch (entity.kind) {
+    case "organization":
+      return entity.data.logo;
+    case "place":
+    case "event":
+      return entity.data.image;
+    case "person":
+      return undefined;
+  }
+}
+
 function SectionLabel({ children }: { children: string }) {
   return (
     <h3 className="text-xs font-medium uppercase tracking-wide text-zinc-500">
@@ -293,6 +305,7 @@ export function EntityPanel({
   onChanged: () => void;
 }) {
   const { title, subtitle } = getHeaderInfo(entity);
+  const headerImage = getHeaderImage(entity);
   const [editing, setEditing] = useState(false);
   const { isAdmin } = useCurrentUser();
 
@@ -318,10 +331,10 @@ export function EntityPanel({
     <FloatingPanel className="pointer-events-auto w-full max-w-sm p-5">
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-start gap-3">
-          {entity.kind === "organization" && entity.data.logo && (
+          {headerImage && (
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={entity.data.logo}
+              src={headerImage}
               alt=""
               className="mt-0.5 h-10 w-10 shrink-0 rounded-lg border border-white/10 bg-white/5 object-contain p-1"
             />

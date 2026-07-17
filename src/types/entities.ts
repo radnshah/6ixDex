@@ -70,6 +70,7 @@ export interface Place extends BaseEntity {
   category: PlaceCategory;
   subtype: PlaceSubtype;
   location: GeoPoint;
+  image?: string;
   address?: string;
 }
 
@@ -92,6 +93,7 @@ export type EventSubtype =
 export interface Event extends BaseEntity {
   category: EventCategory;
   subtype?: EventSubtype;
+  image?: string;
   date: string;
   location: GeoPoint;
   organizationIds?: string[];

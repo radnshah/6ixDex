@@ -91,6 +91,14 @@ function renderMetaForKind(kind: string, rawItem: ListItem): ReactNode {
   }
 }
 
+// Small thumbnail shown next to the name for kinds that carry a logo/image
+// URL (organization: logo, place/event: image).
+function getThumbnailForKind(kind: string, rawItem: ListItem): string | undefined {
+  const item = rawItem as unknown as Record<string, unknown>;
+  const key = kind === "organization" ? "logo" : "image";
+  return typeof item[key] === "string" ? (item[key] as string) : undefined;
+}
+
 function renderMediaForKind(kind: string, rawItem: ListItem): ReactNode {
   const item = rawItem as unknown as Record<string, unknown>;
   if (kind !== "content" || !item.primaryThumbnail) return null;
@@ -169,15 +177,14 @@ export function EntityListView<T extends ListItem>({
                 )}
                 {renderMediaForKind(kind, item)}
                 <div className="flex min-w-0 items-center gap-3 pr-16">
-                  {kind === "organization" &&
-                    (item as unknown as { logo?: string }).logo && (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={(item as unknown as { logo: string }).logo}
-                        alt=""
-                        className="h-8 w-8 shrink-0 rounded-lg border border-white/10 bg-white/5 object-contain p-1"
-                      />
-                    )}
+                  {getThumbnailForKind(kind, item) && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={getThumbnailForKind(kind, item)}
+                      alt=""
+                      className="h-8 w-8 shrink-0 rounded-lg border border-white/10 bg-white/5 object-contain p-1"
+                    />
+                  )}
                   <h2 className="min-w-0 truncate text-sm font-semibold text-zinc-50">
                     {item.name}
                   </h2>

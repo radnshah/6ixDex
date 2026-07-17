@@ -7,6 +7,7 @@
       "subtype": "Startup",
       "description": "Autonomous delivery robots for dense urban environments.",
       "industry": "Robotics",
+      "logo": "https://placehold.co/200x200/0f172a/22d3ee?text=NR",
       "location": {
         "lat": 43.644,
         "lng": -79.403
@@ -40,6 +41,7 @@
       "subtype": "Startup",
       "description": "Embedded ledger infrastructure for small business banking.",
       "industry": "Fintech",
+      "logo": "https://placehold.co/200x200/0f172a/22d3ee?text=LG",
       "location": {
         "lat": 43.6483,
         "lng": -79.3805
@@ -68,6 +70,7 @@
       "subtype": "Startup",
       "description": "Software for distributed energy storage and grid balancing.",
       "industry": "Clean Energy",
+      "logo": "https://placehold.co/200x200/0f172a/22d3ee?text=GG",
       "location": {
         "lat": 43.6385,
         "lng": -79.421
@@ -93,6 +96,7 @@
       "subtype": "Startup",
       "description": "Diagnostic decision-support tooling for primary care clinics.",
       "industry": "Health Tech",
+      "logo": "https://placehold.co/200x200/0f172a/22d3ee?text=WH",
       "location": {
         "lat": 43.659,
         "lng": -79.388
@@ -121,6 +125,7 @@
       "subtype": "Scale-up",
       "description": "Analytics infrastructure for logistics and supply chain networks.",
       "industry": "Data & AI",
+      "logo": "https://placehold.co/200x200/0f172a/22d3ee?text=KA",
       "location": {
         "lat": 43.6503,
         "lng": -79.3596
@@ -146,6 +151,7 @@
       "subtype": "Startup",
       "description": "Commerce tooling built for independent Canadian retailers.",
       "industry": "E-commerce",
+      "logo": "https://placehold.co/200x200/0f172a/22d3ee?text=LC",
       "location": {
         "lat": 43.6455,
         "lng": -79.399
@@ -237,6 +243,7 @@
       "name": "MaRS Discovery District",
       "category": "Workspace",
       "subtype": "Office",
+      "image": "https://placehold.co/200x200/1e1b4b/a78bfa?text=MD",
       "location": {
         "lat": 43.6596,
         "lng": -79.3899
@@ -248,6 +255,7 @@
       "name": "ONE ELEVEN",
       "category": "Workspace",
       "subtype": "Coworking Space",
+      "image": "https://placehold.co/200x200/1e1b4b/a78bfa?text=111",
       "location": {
         "lat": 43.6448,
         "lng": -79.4008
@@ -259,6 +267,7 @@
       "name": "DMZ",
       "category": "Workspace",
       "subtype": "Office",
+      "image": "https://placehold.co/200x200/1e1b4b/a78bfa?text=DMZ",
       "location": {
         "lat": 43.6577,
         "lng": -79.3788
@@ -272,6 +281,7 @@
       "name": "AI Builders Hackathon",
       "category": "Competition",
       "subtype": "Hackathon",
+      "image": "https://placehold.co/200x200/431407/fb923c?text=AI",
       "date": "2026-08-15",
       "location": {
         "lat": 43.6599,
@@ -287,6 +297,7 @@
       "name": "Toronto Tech Week Meetup",
       "category": "Networking",
       "subtype": "Meetup",
+      "image": "https://placehold.co/200x200/431407/fb923c?text=TW",
       "date": "2026-09-10",
       "location": {
         "lat": 43.6451,

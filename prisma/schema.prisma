@@ -88,6 +88,7 @@ model Place {
   name     String
   category String
   subtype  String
+  image    String?
   lat      Float
   lng      Float
   address  String?
@@ -98,6 +99,7 @@ model Event {
   name            String
   category        String
   subtype         String?
+  image           String?
   date            String
   lat             Float
   lng             Float
