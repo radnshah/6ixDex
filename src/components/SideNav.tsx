@@ -77,6 +77,16 @@ const NAV_ITEMS = [
       </>
     ),
   },
+  {
+    href: "/suggest",
+    label: "Suggest",
+    icon: (
+      <>
+        <path d="M9 18h6M10 22h4" />
+        <path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.2 1 2.05V17h6v-2.25c0-.85.4-1.55 1-2.05A7 7 0 0 0 12 2Z" />
+      </>
+    ),
+  },
 ];
 
 function displayNameFromEmail(email: string): string {
@@ -86,7 +96,7 @@ function displayNameFromEmail(email: string): string {
 
 export function SideNav() {
   const pathname = usePathname();
-  const { user, loading } = useCurrentUser();
+  const { user, isAdmin, loading } = useCurrentUser();
 
   async function handleLogout() {
     const supabase = createClient();
@@ -129,6 +139,30 @@ export function SideNav() {
         {!loading && (
           <>
             <div className="my-1 border-t border-white/10" />
+            {isAdmin && (
+              <Link
+                href="/suggestions"
+                className={`flex flex-col items-center gap-1 rounded-xl px-3 py-2 transition-colors ${
+                  pathname === "/suggestions"
+                    ? "bg-white/10 text-cyan-400"
+                    : "text-zinc-400 hover:bg-white/5 hover:text-zinc-100"
+                }`}
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M22 12h-6l-2 3h-4l-2-3H2" />
+                  <path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11Z" />
+                </svg>
+                <span className="text-[10px] font-medium">Inbox</span>
+              </Link>
+            )}
             {user && (
               <div className="flex flex-col items-center gap-1 px-3 py-2 text-zinc-300">
                 <svg

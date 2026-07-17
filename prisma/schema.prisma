@@ -34,6 +34,17 @@ model Visit {
   @@unique([entityType, entityId])
 }
 
+// Anonymous, low-friction "suggest a spot/event/opportunity" inbox - not a
+// live entity until the admin reviews it and decides to act on it.
+model Suggestion {
+  id          String   @id @default(cuid())
+  type        String
+  description String
+  contactInfo String?
+  reviewed    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
+
 model Organization {
   entityId      String   @id
   name          String
