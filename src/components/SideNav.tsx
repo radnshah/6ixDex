@@ -79,6 +79,11 @@ const NAV_ITEMS = [
   },
 ];
 
+function displayNameFromEmail(email: string): string {
+  const localPart = email.split("@")[0];
+  return localPart.charAt(0).toUpperCase() + localPart.slice(1);
+}
+
 export function SideNav() {
   const pathname = usePathname();
   const router = useRouter();
@@ -125,6 +130,25 @@ export function SideNav() {
         {!loading && (
           <>
             <div className="my-1 border-t border-white/10" />
+            {user && (
+              <div className="flex flex-col items-center gap-1 px-3 py-2 text-zinc-300">
+                <svg
+                  viewBox="0 0 24 24"
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <circle cx="12" cy="8" r="4" />
+                  <path d="M4 21c0-4 4-6 8-6s8 2 8 6" />
+                </svg>
+                <span className="max-w-[64px] truncate text-[10px] font-medium">
+                  {displayNameFromEmail(user.email)}
+                </span>
+              </div>
+            )}
             {user ? (
               <button
                 onClick={handleLogout}
