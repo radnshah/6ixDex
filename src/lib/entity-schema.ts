@@ -60,6 +60,7 @@ export const ENTITY_FIELDS: Record<EntityTypeKey, FieldDef[]> = {
     },
     { key: "description", label: "Description", type: "textarea", required: true },
     { key: "industry", label: "Industry", type: "text" },
+    { key: "logo", label: "Logo URL", type: "text" },
     { key: "location", label: "Location", type: "geopoint", required: true },
     { key: "website", label: "Website", type: "text" },
     { key: "linkedin", label: "LinkedIn", type: "text" },

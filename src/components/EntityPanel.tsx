@@ -54,6 +54,12 @@ function OrganizationBody({
   const relatedEvents = (organization.eventIds ?? [])
     .map((id) => data.events.find((event) => event.entityId === id))
     .filter((event): event is Event => event !== undefined);
+  const relatedContent = data.content.filter((item) =>
+    item.relatedOrganizationIds?.includes(organization.entityId),
+  );
+  const relatedJournal = data.journal.filter((entry) =>
+    entry.relatedOrganizationIds?.includes(organization.entityId),
+  );
 
   const facts = [
     { label: "Stage", value: organization.stage },
@@ -131,6 +137,34 @@ function OrganizationBody({
               <li key={event.entityId} className="text-sm text-zinc-200">
                 {event.name}{" "}
                 <span className="text-zinc-500">— {event.date}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {relatedContent.length > 0 && (
+        <div className="mt-4">
+          <SectionLabel>Content</SectionLabel>
+          <ul className="mt-1.5 space-y-1">
+            {relatedContent.map((item) => (
+              <li key={item.entityId} className="text-sm text-zinc-200">
+                {item.name}{" "}
+                <span className="text-zinc-500">— {item.category}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {relatedJournal.length > 0 && (
+        <div className="mt-4">
+          <SectionLabel>Journal</SectionLabel>
+          <ul className="mt-1.5 space-y-1">
+            {relatedJournal.map((entry) => (
+              <li key={entry.entityId} className="text-sm text-zinc-200">
+                {entry.name}{" "}
+                <span className="text-zinc-500">— {entry.date}</span>
               </li>
             ))}
           </ul>
@@ -283,11 +317,21 @@ export function EntityPanel({
   return (
     <FloatingPanel className="pointer-events-auto w-full max-w-sm p-5">
       <div className="flex items-start justify-between gap-4">
-        <div>
-          <h2 className="text-lg font-semibold text-zinc-50">{title}</h2>
-          <p className="text-xs uppercase tracking-wide text-cyan-400">
-            {subtitle}
-          </p>
+        <div className="flex items-start gap-3">
+          {entity.kind === "organization" && entity.data.logo && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={entity.data.logo}
+              alt=""
+              className="mt-0.5 h-10 w-10 shrink-0 rounded-lg border border-white/10 bg-white/5 object-contain p-1"
+            />
+          )}
+          <div>
+            <h2 className="text-lg font-semibold text-zinc-50">{title}</h2>
+            <p className="text-xs uppercase tracking-wide text-cyan-400">
+              {subtitle}
+            </p>
+          </div>
         </div>
         <div className="flex shrink-0 gap-1">
           {isAdmin && (

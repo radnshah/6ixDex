@@ -36,6 +36,7 @@ export interface Organization extends BaseEntity {
   subtype: OrganizationSubtype;
   description: string;
   location: GeoPoint;
+  logo?: string;
   website?: string;
   linkedin?: string;
   founded?: number;

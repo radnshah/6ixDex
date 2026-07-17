@@ -168,9 +168,20 @@ export function EntityListView<T extends ListItem>({
                   </div>
                 )}
                 {renderMediaForKind(kind, item)}
-                <h2 className="pr-16 text-sm font-semibold text-zinc-50">
-                  {item.name}
-                </h2>
+                <div className="flex min-w-0 items-center gap-3 pr-16">
+                  {kind === "organization" &&
+                    (item as unknown as { logo?: string }).logo && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={(item as unknown as { logo: string }).logo}
+                        alt=""
+                        className="h-8 w-8 shrink-0 rounded-lg border border-white/10 bg-white/5 object-contain p-1"
+                      />
+                    )}
+                  <h2 className="min-w-0 truncate text-sm font-semibold text-zinc-50">
+                    {item.name}
+                  </h2>
+                </div>
                 <div className="mt-1 text-xs text-zinc-400">
                   {renderMetaForKind(kind, item)}
                 </div>

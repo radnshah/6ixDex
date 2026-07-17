@@ -58,6 +58,7 @@ model Organization {
   subtype       String
   description   String
   industry      String?
+  logo          String?
   lat           Float
   lng           Float
   website       String?
