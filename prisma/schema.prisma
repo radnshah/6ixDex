@@ -4,8 +4,22 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum UserRole {
+  ADMIN
+  VIEWER
+}
+
+// Mirrors a Supabase auth.users row (matched by id) so we can attach an
+// app-specific role without Prisma needing to manage the auth schema itself.
+model UserProfile {
+  id    String   @id
+  email String   @unique
+  role  UserRole @default(VIEWER)
 }
 
 model Organization {

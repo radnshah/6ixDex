@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { FloatingPanel } from "./FloatingPanel";
+import { useCurrentUser } from "@/lib/use-current-user";
+import { createClient } from "@/lib/supabase/client";
 
 const NAV_ITEMS = [
   {
@@ -79,6 +81,15 @@ const NAV_ITEMS = [
 
 export function SideNav() {
   const pathname = usePathname();
+  const router = useRouter();
+  const { user, loading } = useCurrentUser();
+
+  async function handleLogout() {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push("/");
+    router.refresh();
+  }
 
   return (
     <div className="pointer-events-none fixed left-4 top-1/2 z-40 -translate-y-1/2 sm:left-6">
@@ -110,6 +121,51 @@ export function SideNav() {
             </Link>
           );
         })}
+
+        {!loading && (
+          <>
+            <div className="my-1 border-t border-white/10" />
+            {user ? (
+              <button
+                onClick={handleLogout}
+                className="flex flex-col items-center gap-1 rounded-xl px-3 py-2 text-zinc-400 transition-colors hover:bg-white/5 hover:text-zinc-100"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                  <path d="M16 17l5-5-5-5M21 12H9" />
+                </svg>
+                <span className="text-[10px] font-medium">Log out</span>
+              </button>
+            ) : (
+              <Link
+                href="/login"
+                className="flex flex-col items-center gap-1 rounded-xl px-3 py-2 text-zinc-400 transition-colors hover:bg-white/5 hover:text-zinc-100"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+                  <path d="M10 17l5-5-5-5M15 12H3" />
+                </svg>
+                <span className="text-[10px] font-medium">Log in</span>
+              </Link>
+            )}
+          </>
+        )}
       </FloatingPanel>
     </div>
   );

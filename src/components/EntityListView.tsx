@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { FloatingPanel } from "./FloatingPanel";
 import { EntityFormModal } from "./EntityFormModal";
 import { KIND_TO_API_TYPE } from "@/lib/entity-schema";
+import { useCurrentUser } from "@/lib/use-current-user";
 
 interface ListItem {
   entityId: string;
@@ -118,6 +119,7 @@ export function EntityListView<T extends ListItem>({
   const router = useRouter();
   const apiType = KIND_TO_API_TYPE[kind];
   const [editingItem, setEditingItem] = useState<T | "new" | null>(null);
+  const { isAdmin } = useCurrentUser();
 
   function handleSaved() {
     setEditingItem(null);
@@ -134,12 +136,14 @@ export function EntityListView<T extends ListItem>({
               {items.length} {items.length === 1 ? "entry" : "entries"}
             </p>
           </div>
-          <button
-            onClick={() => setEditingItem("new")}
-            className="shrink-0 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-cyan-400 transition-colors hover:bg-white/10 hover:text-cyan-300"
-          >
-            + Add new
-          </button>
+          {isAdmin && (
+            <button
+              onClick={() => setEditingItem("new")}
+              className="shrink-0 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-cyan-400 transition-colors hover:bg-white/10 hover:text-cyan-300"
+            >
+              + Add new
+            </button>
+          )}
         </div>
 
         <div className="mt-6 space-y-3">
@@ -148,19 +152,21 @@ export function EntityListView<T extends ListItem>({
               <FloatingPanel
                 className={`relative p-4 ${linkToMap ? "transition-colors hover:bg-white/10" : ""}`}
               >
-                <div className="absolute right-3 top-3 flex gap-1">
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      setEditingItem(item);
-                    }}
-                    aria-label="Edit"
-                    className="rounded-full p-1.5 text-zinc-500 transition-colors hover:bg-white/10 hover:text-zinc-100"
-                  >
-                    <EditIcon />
-                  </button>
-                </div>
+                {isAdmin && (
+                  <div className="absolute right-3 top-3 flex gap-1">
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setEditingItem(item);
+                      }}
+                      aria-label="Edit"
+                      className="rounded-full p-1.5 text-zinc-500 transition-colors hover:bg-white/10 hover:text-zinc-100"
+                    >
+                      <EditIcon />
+                    </button>
+                  </div>
+                )}
                 {renderMediaForKind(kind, item)}
                 <h2 className="pr-16 text-sm font-semibold text-zinc-50">
                   {item.name}

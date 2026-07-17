@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createEntity, listEntities, type EntityTypeKey } from "@/lib/db";
+import { isAdmin } from "@/lib/auth";
 
 const VALID_TYPES: EntityTypeKey[] = [
   "organizations",
@@ -33,6 +34,9 @@ export async function POST(
   const { entityType } = await params;
   if (!isValidType(entityType)) {
     return NextResponse.json({ error: "Unknown entity type" }, { status: 404 });
+  }
+  if (!(await isAdmin())) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
   const data = await request.json();
   const entity = await createEntity(entityType, data);

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { FloatingPanel } from "./FloatingPanel";
 import { EntityFormModal } from "./EntityFormModal";
 import { KIND_TO_API_TYPE } from "@/lib/entity-schema";
+import { useCurrentUser } from "@/lib/use-current-user";
 import type { EntityData } from "@/lib/use-entity-data";
 import type {
   Event,
@@ -259,6 +260,7 @@ export function EntityPanel({
 }) {
   const { title, subtitle } = getHeaderInfo(entity);
   const [editing, setEditing] = useState(false);
+  const { isAdmin } = useCurrentUser();
 
   function handleSaved() {
     setEditing(false);
@@ -275,13 +277,15 @@ export function EntityPanel({
           </p>
         </div>
         <div className="flex shrink-0 gap-1">
-          <button
-            onClick={() => setEditing(true)}
-            aria-label="Edit"
-            className="rounded-full p-1 text-zinc-400 transition-colors hover:bg-white/10 hover:text-zinc-100"
-          >
-            <EditIcon />
-          </button>
+          {isAdmin && (
+            <button
+              onClick={() => setEditing(true)}
+              aria-label="Edit"
+              className="rounded-full p-1 text-zinc-400 transition-colors hover:bg-white/10 hover:text-zinc-100"
+            >
+              <EditIcon />
+            </button>
+          )}
           <button
             onClick={onClose}
             aria-label="Close"
