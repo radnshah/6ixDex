@@ -3,49 +3,40 @@
 import { useEffect, useState } from "react";
 import { FloatingPanel } from "./FloatingPanel";
 
-const DAYS_ON_JOURNEY = 58;
-
-interface Counts {
-  organizations: number;
-  events: number;
-  content: number;
-  people: number;
+interface JourneyStats {
+  daysOnJourney: number;
+  startupsVisited: number;
+  eventsAttended: number;
+  contentCreated: number;
+  peopleMet: number;
 }
 
 export function JourneyDashboard() {
-  const [counts, setCounts] = useState<Counts | null>(null);
+  const [stats, setStats] = useState<JourneyStats | null>(null);
 
   useEffect(() => {
     let cancelled = false;
-    Promise.all(
-      ["organizations", "events", "content", "people"].map((type) =>
-        fetch(`/api/${type}`).then((res) => res.json()),
-      ),
-    ).then(([organizations, events, content, people]) => {
-      if (cancelled) return;
-      setCounts({
-        organizations: organizations.length,
-        events: events.length,
-        content: content.length,
-        people: people.length,
+    fetch("/api/journey-stats")
+      .then((res) => res.json())
+      .then((data) => {
+        if (!cancelled) setStats(data);
       });
-    });
     return () => {
       cancelled = true;
     };
   }, []);
 
-  const stats = [
-    { label: "Days on journey", value: DAYS_ON_JOURNEY },
-    { label: "Startups visited", value: counts?.organizations ?? 0 },
-    { label: "Events attended", value: counts?.events ?? 0 },
-    { label: "Content created", value: counts?.content ?? 0 },
-    { label: "People met", value: counts?.people ?? 0 },
+  const items = [
+    { label: "Days on journey", value: stats?.daysOnJourney ?? 0 },
+    { label: "Startups visited", value: stats?.startupsVisited ?? 0 },
+    { label: "Events attended", value: stats?.eventsAttended ?? 0 },
+    { label: "Content created", value: stats?.contentCreated ?? 0 },
+    { label: "People met", value: stats?.peopleMet ?? 0 },
   ];
 
   return (
     <FloatingPanel className="pointer-events-auto mx-auto flex w-fit min-w-0 max-w-full items-stretch divide-x divide-white/10 overflow-x-auto px-2 py-3 sm:px-4">
-      {stats.map((stat) => (
+      {items.map((stat) => (
         <div
           key={stat.label}
           className="flex shrink-0 flex-col items-center gap-0.5 px-4 sm:px-6"

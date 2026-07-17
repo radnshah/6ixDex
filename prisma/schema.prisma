@@ -17,9 +17,21 @@ enum UserRole {
 // Mirrors a Supabase auth.users row (matched by id) so we can attach an
 // app-specific role without Prisma needing to manage the auth schema itself.
 model UserProfile {
-  id    String   @id
-  email String   @unique
-  role  UserRole @default(VIEWER)
+  id        String   @id
+  email     String   @unique
+  role      UserRole @default(VIEWER)
+  createdAt DateTime @default(now())
+}
+
+// Logs the first time the admin opens a given entity's panel - a real
+// "visited/attended/met" signal rather than just counting rows that exist.
+model Visit {
+  id         String   @id @default(cuid())
+  entityType String
+  entityId   String
+  visitedAt  DateTime @default(now())
+
+  @@unique([entityType, entityId])
 }
 
 model Organization {

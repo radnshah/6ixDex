@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FloatingPanel } from "./FloatingPanel";
 import { EntityFormModal } from "./EntityFormModal";
 import { KIND_TO_API_TYPE } from "@/lib/entity-schema";
@@ -261,6 +261,19 @@ export function EntityPanel({
   const { title, subtitle } = getHeaderInfo(entity);
   const [editing, setEditing] = useState(false);
   const { isAdmin } = useCurrentUser();
+
+  useEffect(() => {
+    // Only logs when it's actually the admin browsing — the API rejects
+    // anyone else, so this just silently no-ops for public viewers.
+    fetch("/api/visits", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        entityType: entity.kind,
+        entityId: entity.data.entityId,
+      }),
+    }).catch(() => {});
+  }, [entity.kind, entity.data.entityId]);
 
   function handleSaved() {
     setEditing(false);
