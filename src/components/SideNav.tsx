@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { FloatingPanel } from "./FloatingPanel";
 import { useCurrentUser } from "@/lib/use-current-user";
 import { createClient } from "@/lib/supabase/client";
@@ -86,14 +86,13 @@ function displayNameFromEmail(email: string): string {
 
 export function SideNav() {
   const pathname = usePathname();
-  const router = useRouter();
   const { user, loading } = useCurrentUser();
 
   async function handleLogout() {
     const supabase = createClient();
     await supabase.auth.signOut();
-    router.push("/");
-    router.refresh();
+    // Full navigation, not router.push - see the comment in login/page.tsx.
+    window.location.href = "/";
   }
 
   return (

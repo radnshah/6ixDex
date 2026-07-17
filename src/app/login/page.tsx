@@ -1,12 +1,10 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { FloatingPanel } from "@/components/FloatingPanel";
 
 export default function LoginPage() {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -29,8 +27,11 @@ export default function LoginPage() {
       return;
     }
 
-    router.push("/");
-    router.refresh();
+    // A full navigation (not router.push) so every client component that
+    // reads auth state on mount — like SideNav, which lives in the root
+    // layout and won't remount on a soft navigation — picks up the new
+    // session immediately instead of only after a manual page reload.
+    window.location.href = "/";
   }
 
   return (
