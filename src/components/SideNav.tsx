@@ -70,22 +70,12 @@ const NAV_ITEMS: NavItem[] = [
     ),
   },
   {
-    href: "/content",
-    label: "Content",
+    href: "/feed",
+    label: "Feed",
     icon: (
       <>
         <rect x="3" y="5" width="18" height="14" rx="2" />
         <path d="m10 9 5 3-5 3V9Z" />
-      </>
-    ),
-  },
-  {
-    href: "/journal",
-    label: "Journal",
-    icon: (
-      <>
-        <rect x="5" y="3" width="14" height="18" rx="1" />
-        <path d="M9 3v18M13 8h4M13 12h4" />
       </>
     ),
   },
