@@ -194,6 +194,9 @@ function HomeContent() {
               kind="organization"
               items={organizations}
               isAdmin={isAdmin}
+              selectedEntityId={
+                selectedRef?.kind === "organization" ? selectedRef.entityId : undefined
+              }
               onSelect={(org) =>
                 handleSelectFromBrowsePanel({ kind: "organization", data: org })
               }

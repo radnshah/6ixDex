@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { FloatingPanel } from "./FloatingPanel";
 import { EntityFormModal } from "./EntityFormModal";
 import { KIND_TO_API_TYPE } from "@/lib/entity-schema";
+import { MAP_KIND_TAXONOMY, type MapKind } from "@/lib/taxonomy";
 import {
   EditIcon,
   getThumbnailForKind,
@@ -19,6 +20,7 @@ export function EntityListPanel<T extends ListItem>({
   kind,
   items,
   isAdmin,
+  selectedEntityId,
   onSelect,
   onChanged,
   onClose,
@@ -27,12 +29,39 @@ export function EntityListPanel<T extends ListItem>({
   kind: string;
   items: T[];
   isAdmin: boolean;
+  selectedEntityId?: string;
   onSelect: (item: T) => void;
   onChanged: () => void;
   onClose: () => void;
 }) {
   const apiType = KIND_TO_API_TYPE[kind];
   const [editingItem, setEditingItem] = useState<T | "new" | null>(null);
+  const [query, setQuery] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
+  const selectedRef = useRef<HTMLButtonElement>(null);
+
+  const categoryOptions =
+    kind in MAP_KIND_TAXONOMY
+      ? Object.keys(MAP_KIND_TAXONOMY[kind as MapKind].categories)
+      : [];
+
+  const filteredItems = useMemo(() => {
+    const normalized = query.trim().toLowerCase();
+    return items.filter((item) => {
+      const record = item as unknown as Record<string, unknown>;
+      if (categoryFilter && record.category !== categoryFilter) return false;
+      if (!normalized) return true;
+      return [item.name, record.category, record.subtype, record.industry]
+        .filter(Boolean)
+        .some((value) => String(value).toLowerCase().includes(normalized));
+    });
+  }, [items, query, categoryFilter]);
+
+  // Keep the currently-selected card in view when selection changes
+  // elsewhere (e.g. clicking a pin directly on the map).
+  useEffect(() => {
+    selectedRef.current?.scrollIntoView({ block: "nearest" });
+  }, [selectedEntityId]);
 
   function handleSaved() {
     setEditingItem(null);
@@ -45,7 +74,9 @@ export function EntityListPanel<T extends ListItem>({
         <div>
           <h2 className="text-sm font-semibold text-zinc-100">{title}</h2>
           <p className="mt-0.5 text-xs text-zinc-500">
-            {items.length} {items.length === 1 ? "entry" : "entries"}
+            {filteredItems.length === items.length
+              ? `${items.length} ${items.length === 1 ? "entry" : "entries"}`
+              : `${filteredItems.length} of ${items.length}`}
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-1">
@@ -69,14 +100,63 @@ export function EntityListPanel<T extends ListItem>({
         </div>
       </div>
 
+      <div className="mt-3">
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder={`Search ${title.toLowerCase()}...`}
+          className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-zinc-100 placeholder-zinc-500 outline-none transition-colors focus:border-cyan-400/40"
+        />
+      </div>
+
+      {categoryOptions.length > 0 && (
+        <div className="mt-2 flex flex-wrap gap-1.5">
+          <button
+            onClick={() => setCategoryFilter(null)}
+            className={`rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${
+              categoryFilter === null
+                ? "border-cyan-400/40 bg-cyan-400/10 text-cyan-400"
+                : "border-white/10 bg-white/5 text-zinc-400 hover:bg-white/10"
+            }`}
+          >
+            All
+          </button>
+          {categoryOptions.map((category) => (
+            <button
+              key={category}
+              onClick={() =>
+                setCategoryFilter((prev) => (prev === category ? null : category))
+              }
+              className={`rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${
+                categoryFilter === category
+                  ? "border-cyan-400/40 bg-cyan-400/10 text-cyan-400"
+                  : "border-white/10 bg-white/5 text-zinc-400 hover:bg-white/10"
+              }`}
+            >
+              {category}
+            </button>
+          ))}
+        </div>
+      )}
+
       <div className="mt-3 -mr-2 space-y-2 overflow-y-auto pr-2">
-        {items.map((item) => {
+        {filteredItems.length === 0 && (
+          <p className="py-6 text-center text-xs text-zinc-500">No matches.</p>
+        )}
+        {filteredItems.map((item) => {
           const thumbnail = getThumbnailForKind(kind, item);
+          const isSelected = item.entityId === selectedEntityId;
           return (
             <button
               key={item.entityId}
+              ref={isSelected ? selectedRef : undefined}
               onClick={() => onSelect(item)}
-              className="group relative block w-full rounded-xl border border-white/10 bg-white/5 p-3 text-left transition-colors hover:bg-white/10"
+              className={`group relative block w-full rounded-xl border p-3 text-left transition-colors ${
+                isSelected
+                  ? "border-cyan-400/40 bg-cyan-400/10"
+                  : "border-white/10 bg-white/5 hover:bg-white/10"
+              }`}
             >
               {isAdmin && (
                 <span
@@ -107,7 +187,11 @@ export function EntityListPanel<T extends ListItem>({
                     className="h-7 w-7 shrink-0 rounded-lg border border-white/10 bg-white/5 object-contain p-0.5"
                   />
                 )}
-                <h3 className="min-w-0 truncate text-sm font-medium text-zinc-50">
+                <h3
+                  className={`min-w-0 truncate text-sm font-medium ${
+                    isSelected ? "text-cyan-400" : "text-zinc-50"
+                  }`}
+                >
                   {item.name}
                 </h3>
               </div>
