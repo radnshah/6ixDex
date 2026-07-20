@@ -12,14 +12,21 @@ import { FloatingPanel } from "@/components/FloatingPanel";
 import { allLeafKeys } from "@/lib/map-filter";
 import { useCurrentUser } from "@/lib/use-current-user";
 import { useEntityData } from "@/lib/use-entity-data";
+import type { ListItem } from "@/lib/entity-render";
 import type { SearchResult } from "@/lib/search";
 import type { MapEntity } from "@/types/entities";
 
 // Entity kinds that can be browsed via the in-map list panel (SideNav's
-// "browse" query param) rather than a separate routed page. Kept as a
-// subset for now — Content/Journal/Suggest aren't spatial, so they stay
-// as regular pages.
-const BROWSABLE_KINDS = new Set(["organization"]);
+// "browse" query param) rather than a separate routed page. Content/
+// Journal/Suggest aren't spatial, so they stay as regular pages.
+const BROWSABLE_KINDS = new Set(["organization", "event", "place", "person"]);
+
+const BROWSE_TITLES: Record<string, string> = {
+  organization: "Organizations",
+  event: "Events",
+  place: "Places",
+  person: "People",
+};
 
 interface EntityRef {
   kind: MapEntity["kind"];
@@ -116,16 +123,40 @@ function HomeContent() {
 
   function handleSelectFromBrowsePanel(entity: MapEntity) {
     setSelectedRef({ kind: entity.kind, entityId: entity.data.entityId });
-    const location =
-      entity.kind === "organization" || entity.kind === "place" || entity.kind === "event"
-        ? entity.data.location
+    let location: { lat: number; lng: number } | undefined;
+    if (
+      entity.kind === "organization" ||
+      entity.kind === "place" ||
+      entity.kind === "event"
+    ) {
+      location = entity.data.location;
+    } else if (entity.kind === "person") {
+      const organization = entity.data.organizationIds?.[0]
+        ? organizations.find((o) => o.entityId === entity.data.organizationIds![0])
         : undefined;
+      location = organization?.location;
+    }
     if (location) mapRef.current?.flyTo(location);
   }
 
   function closeBrowsePanel() {
     router.replace("/", { scroll: false });
   }
+
+  const browseItems: ListItem[] = useMemo(() => {
+    switch (browseKind) {
+      case "organization":
+        return organizations;
+      case "event":
+        return events;
+      case "place":
+        return places;
+      case "person":
+        return people;
+      default:
+        return [];
+    }
+  }, [browseKind, organizations, events, places, people]);
 
   function handleFilterChange(keys: string[], nextEnabled: boolean) {
     setEnabledLeaves((prev) => {
@@ -187,18 +218,18 @@ function HomeContent() {
           </div>
         </div>
 
-        {browseKind === "organization" && (
+        {browseKind && (
           <div className="pointer-events-none absolute left-24 top-1/2 -translate-y-1/2 sm:left-28">
             <EntityListPanel
-              title="Organizations"
-              kind="organization"
-              items={organizations}
+              title={BROWSE_TITLES[browseKind]}
+              kind={browseKind}
+              items={browseItems}
               isAdmin={isAdmin}
               selectedEntityId={
-                selectedRef?.kind === "organization" ? selectedRef.entityId : undefined
+                selectedRef?.kind === browseKind ? selectedRef.entityId : undefined
               }
-              onSelect={(org) =>
-                handleSelectFromBrowsePanel({ kind: "organization", data: org })
+              onSelect={(item) =>
+                handleSelectFromBrowsePanel({ kind: browseKind, data: item } as unknown as MapEntity)
               }
               onChanged={refetch}
               onClose={closeBrowsePanel}

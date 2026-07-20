@@ -37,7 +37,8 @@ const NAV_ITEMS: NavItem[] = [
     ),
   },
   {
-    href: "/events",
+    href: "/?browse=event",
+    browseKind: "event",
     label: "Events",
     icon: (
       <>
@@ -47,7 +48,8 @@ const NAV_ITEMS: NavItem[] = [
     ),
   },
   {
-    href: "/places",
+    href: "/?browse=place",
+    browseKind: "place",
     label: "Places",
     icon: (
       <>
@@ -57,7 +59,8 @@ const NAV_ITEMS: NavItem[] = [
     ),
   },
   {
-    href: "/people",
+    href: "/?browse=person",
+    browseKind: "person",
     label: "People",
     icon: (
       <>
