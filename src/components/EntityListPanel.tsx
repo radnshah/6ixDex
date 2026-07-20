@@ -38,6 +38,7 @@ export function EntityListPanel<T extends ListItem>({
   const [editingItem, setEditingItem] = useState<T | "new" | null>(null);
   const [query, setQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
+  const [categoryMenuOpen, setCategoryMenuOpen] = useState(false);
   const selectedRef = useRef<HTMLButtonElement>(null);
 
   const categoryOptions =
@@ -100,45 +101,68 @@ export function EntityListPanel<T extends ListItem>({
         </div>
       </div>
 
-      <div className="mt-3">
+      <div className="mt-3 flex items-center gap-2">
         <input
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={`Search ${title.toLowerCase()}...`}
-          className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-zinc-100 placeholder-zinc-500 outline-none transition-colors focus:border-cyan-400/40"
+          className="min-w-0 flex-1 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-zinc-100 placeholder-zinc-500 outline-none transition-colors focus:border-cyan-400/40"
         />
-      </div>
-
-      {categoryOptions.length > 0 && (
-        <div className="mt-2 flex flex-wrap gap-1.5">
-          <button
-            onClick={() => setCategoryFilter(null)}
-            className={`rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${
-              categoryFilter === null
-                ? "border-cyan-400/40 bg-cyan-400/10 text-cyan-400"
-                : "border-white/10 bg-white/5 text-zinc-400 hover:bg-white/10"
-            }`}
-          >
-            All
-          </button>
-          {categoryOptions.map((category) => (
+        {categoryOptions.length > 0 && (
+          <div className="relative shrink-0">
             <button
-              key={category}
-              onClick={() =>
-                setCategoryFilter((prev) => (prev === category ? null : category))
-              }
-              className={`rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${
-                categoryFilter === category
+              onClick={() => setCategoryMenuOpen((prev) => !prev)}
+              aria-label="Filter by category"
+              className={`flex h-[34px] w-[34px] items-center justify-center rounded-lg border transition-colors ${
+                categoryFilter || categoryMenuOpen
                   ? "border-cyan-400/40 bg-cyan-400/10 text-cyan-400"
-                  : "border-white/10 bg-white/5 text-zinc-400 hover:bg-white/10"
+                  : "border-white/10 bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-zinc-100"
               }`}
             >
-              {category}
+              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2}>
+                <path d="M4 6h16M7 12h10M10 18h4" />
+              </svg>
             </button>
-          ))}
-        </div>
-      )}
+
+            {categoryMenuOpen && (
+              <div className="absolute right-0 top-full z-10 mt-1.5">
+                <FloatingPanel className="w-44 p-1.5">
+                  <button
+                    onClick={() => {
+                      setCategoryFilter(null);
+                      setCategoryMenuOpen(false);
+                    }}
+                    className={`block w-full rounded-lg px-2.5 py-1.5 text-left text-xs font-medium transition-colors ${
+                      categoryFilter === null
+                        ? "bg-cyan-400/10 text-cyan-400"
+                        : "text-zinc-300 hover:bg-white/10"
+                    }`}
+                  >
+                    All
+                  </button>
+                  {categoryOptions.map((category) => (
+                    <button
+                      key={category}
+                      onClick={() => {
+                        setCategoryFilter(category);
+                        setCategoryMenuOpen(false);
+                      }}
+                      className={`block w-full rounded-lg px-2.5 py-1.5 text-left text-xs font-medium transition-colors ${
+                        categoryFilter === category
+                          ? "bg-cyan-400/10 text-cyan-400"
+                          : "text-zinc-300 hover:bg-white/10"
+                      }`}
+                    >
+                      {category}
+                    </button>
+                  ))}
+                </FloatingPanel>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
       <div className="mt-3 -mr-2 space-y-2 overflow-y-auto pr-2">
         {filteredItems.length === 0 && (
