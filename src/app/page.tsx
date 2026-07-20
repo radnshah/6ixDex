@@ -6,6 +6,7 @@ import Map, { type MapHandle } from "@/components/Map";
 import { SearchBar } from "@/components/SearchBar";
 import { EntityPanel } from "@/components/EntityPanel";
 import { EntityListPanel } from "@/components/EntityListPanel";
+import { FeedListPanel } from "@/components/FeedListPanel";
 import { FilterMenu } from "@/components/FilterMenu";
 import { JourneyDashboard } from "@/components/JourneyDashboard";
 import { FloatingPanel } from "@/components/FloatingPanel";
@@ -39,10 +40,12 @@ function HomeContent() {
   const focusParam = searchParams.get("focus");
   const browseParam = searchParams.get("browse");
   const browseKind = browseParam && BROWSABLE_KINDS.has(browseParam) ? browseParam : null;
+  const feedOpen = browseParam === "feed";
 
   const mapRef = useRef<MapHandle>(null);
   const entityData = useEntityData();
-  const { organizations, people, places, events, loading, refetch } = entityData;
+  const { organizations, people, places, events, content, journal, loading, refetch } =
+    entityData;
   const { isAdmin } = useCurrentUser();
 
   const [selectedRef, setSelectedRef] = useState<EntityRef | null>(null);
@@ -106,7 +109,7 @@ function HomeContent() {
 
   function handleSearchSelect(result: SearchResult) {
     setFilterOpen(false);
-    if (browseKind) closeBrowsePanel();
+    if (browseKind || feedOpen) closeBrowsePanel();
     setSelectedRef({ kind: result.entity.kind, entityId: result.entity.data.entityId });
     mapRef.current?.flyTo(result.location);
   }
@@ -117,7 +120,7 @@ function HomeContent() {
   }
 
   function handleToggleFilter() {
-    if (!filterOpen && browseKind) closeBrowsePanel();
+    if (!filterOpen && (browseKind || feedOpen)) closeBrowsePanel();
     setFilterOpen((prev) => !prev);
   }
 
@@ -231,6 +234,18 @@ function HomeContent() {
               onSelect={(item) =>
                 handleSelectFromBrowsePanel({ kind: browseKind, data: item } as unknown as MapEntity)
               }
+              onChanged={refetch}
+              onClose={closeBrowsePanel}
+            />
+          </div>
+        )}
+
+        {feedOpen && (
+          <div className="pointer-events-none absolute left-24 top-1/2 -translate-y-1/2 sm:left-28">
+            <FeedListPanel
+              content={content}
+              journal={journal}
+              isAdmin={isAdmin}
               onChanged={refetch}
               onClose={closeBrowsePanel}
             />

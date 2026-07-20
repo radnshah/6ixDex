@@ -70,7 +70,8 @@ const NAV_ITEMS: NavItem[] = [
     ),
   },
   {
-    href: "/feed",
+    href: "/?browse=feed",
+    browseKind: "feed",
     label: "Feed",
     icon: (
       <>
