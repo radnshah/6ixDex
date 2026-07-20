@@ -5,13 +5,21 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Map, { type MapHandle } from "@/components/Map";
 import { SearchBar } from "@/components/SearchBar";
 import { EntityPanel } from "@/components/EntityPanel";
+import { EntityListPanel } from "@/components/EntityListPanel";
 import { FilterMenu } from "@/components/FilterMenu";
 import { JourneyDashboard } from "@/components/JourneyDashboard";
 import { FloatingPanel } from "@/components/FloatingPanel";
 import { allLeafKeys } from "@/lib/map-filter";
+import { useCurrentUser } from "@/lib/use-current-user";
 import { useEntityData } from "@/lib/use-entity-data";
 import type { SearchResult } from "@/lib/search";
 import type { MapEntity } from "@/types/entities";
+
+// Entity kinds that can be browsed via the in-map list panel (SideNav's
+// "browse" query param) rather than a separate routed page. Kept as a
+// subset for now — Content/Journal/Suggest aren't spatial, so they stay
+// as regular pages.
+const BROWSABLE_KINDS = new Set(["organization"]);
 
 interface EntityRef {
   kind: MapEntity["kind"];
@@ -22,10 +30,13 @@ function HomeContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const focusParam = searchParams.get("focus");
+  const browseParam = searchParams.get("browse");
+  const browseKind = browseParam && BROWSABLE_KINDS.has(browseParam) ? browseParam : null;
 
   const mapRef = useRef<MapHandle>(null);
   const entityData = useEntityData();
   const { organizations, people, places, events, loading, refetch } = entityData;
+  const { isAdmin } = useCurrentUser();
 
   const [selectedRef, setSelectedRef] = useState<EntityRef | null>(null);
   const [filterOpen, setFilterOpen] = useState(false);
@@ -88,6 +99,7 @@ function HomeContent() {
 
   function handleSearchSelect(result: SearchResult) {
     setFilterOpen(false);
+    if (browseKind) closeBrowsePanel();
     setSelectedRef({ kind: result.entity.kind, entityId: result.entity.data.entityId });
     mapRef.current?.flyTo(result.location);
   }
@@ -98,7 +110,21 @@ function HomeContent() {
   }
 
   function handleToggleFilter() {
+    if (!filterOpen && browseKind) closeBrowsePanel();
     setFilterOpen((prev) => !prev);
+  }
+
+  function handleSelectFromBrowsePanel(entity: MapEntity) {
+    setSelectedRef({ kind: entity.kind, entityId: entity.data.entityId });
+    const location =
+      entity.kind === "organization" || entity.kind === "place" || entity.kind === "event"
+        ? entity.data.location
+        : undefined;
+    if (location) mapRef.current?.flyTo(location);
+  }
+
+  function closeBrowsePanel() {
+    router.replace("/", { scroll: false });
   }
 
   function handleFilterChange(keys: string[], nextEnabled: boolean) {
@@ -160,6 +186,22 @@ function HomeContent() {
             )}
           </div>
         </div>
+
+        {browseKind === "organization" && (
+          <div className="pointer-events-none absolute left-24 top-1/2 -translate-y-1/2 sm:left-28">
+            <EntityListPanel
+              title="Organizations"
+              kind="organization"
+              items={organizations}
+              isAdmin={isAdmin}
+              onSelect={(org) =>
+                handleSelectFromBrowsePanel({ kind: "organization", data: org })
+              }
+              onChanged={refetch}
+              onClose={closeBrowsePanel}
+            />
+          </div>
+        )}
 
         {selectedEntity && (
           <div className="pointer-events-none absolute right-4 top-20 sm:right-6 sm:top-24">

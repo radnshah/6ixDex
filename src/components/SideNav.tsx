@@ -1,12 +1,20 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
+import type { ReactNode } from "react";
 import { FloatingPanel } from "./FloatingPanel";
 import { useCurrentUser } from "@/lib/use-current-user";
 import { createClient } from "@/lib/supabase/client";
 
-const NAV_ITEMS = [
+interface NavItem {
+  href: string;
+  label: string;
+  icon: ReactNode;
+  browseKind?: string;
+}
+
+const NAV_ITEMS: NavItem[] = [
   {
     href: "/",
     label: "Map",
@@ -18,7 +26,8 @@ const NAV_ITEMS = [
     ),
   },
   {
-    href: "/organizations",
+    href: "/?browse=organization",
+    browseKind: "organization",
     label: "Orgs",
     icon: (
       <>
@@ -96,6 +105,8 @@ function displayNameFromEmail(email: string): string {
 
 export function SideNav() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const browseParam = searchParams.get("browse");
   const { user, isAdmin, loading } = useCurrentUser();
 
   async function handleLogout() {
@@ -109,7 +120,9 @@ export function SideNav() {
     <div className="pointer-events-none fixed left-4 top-1/2 z-40 -translate-y-1/2 sm:left-6">
       <FloatingPanel className="pointer-events-auto flex flex-col gap-1 p-2">
         {NAV_ITEMS.map((item) => {
-          const active = pathname === item.href;
+          const active = item.browseKind
+            ? pathname === "/" && browseParam === item.browseKind
+            : pathname === "/" ? item.href === "/" && !browseParam : pathname === item.href;
           return (
             <Link
               key={item.href}

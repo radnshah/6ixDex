@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { Suspense, useState, type ReactNode } from "react";
 import { AnimatePresence, LayoutGroup } from "framer-motion";
 import { SideNav } from "./SideNav";
 import { LogoAnimation } from "./LogoAnimation";
@@ -15,7 +15,9 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       {!loading && (
         <>
-          <SideNav />
+          <Suspense fallback={null}>
+            <SideNav />
+          </Suspense>
           <LogoAnimation />
         </>
       )}
