@@ -70,8 +70,8 @@ export function EntityListPanel<T extends ListItem>({
   }
 
   return (
-    <FloatingPanel className="pointer-events-auto flex max-h-[70vh] w-80 flex-col p-4">
-      <div className="flex items-start justify-between gap-3">
+    <FloatingPanel className="pointer-events-auto flex h-[70vh] w-80 flex-col p-4">
+      <div className="flex shrink-0 items-start justify-between gap-3">
         <div>
           <h2 className="text-sm font-semibold text-zinc-100">{title}</h2>
           <p className="mt-0.5 text-xs text-zinc-500">
@@ -101,7 +101,7 @@ export function EntityListPanel<T extends ListItem>({
         </div>
       </div>
 
-      <div className="mt-3 flex items-center gap-2">
+      <div className="mt-3 flex shrink-0 items-center gap-2">
         <input
           type="text"
           value={query}
@@ -109,62 +109,60 @@ export function EntityListPanel<T extends ListItem>({
           placeholder={`Search ${title.toLowerCase()}...`}
           className="min-w-0 flex-1 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-zinc-100 placeholder-zinc-500 outline-none transition-colors focus:border-cyan-400/40"
         />
-        {categoryOptions.length > 0 && (
-          <div className="relative shrink-0">
-            <button
-              onClick={() => setCategoryMenuOpen((prev) => !prev)}
-              aria-label="Filter by category"
-              className={`flex h-[34px] w-[34px] items-center justify-center rounded-lg border transition-colors ${
-                categoryFilter || categoryMenuOpen
-                  ? "border-cyan-400/40 bg-cyan-400/10 text-cyan-400"
-                  : "border-white/10 bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-zinc-100"
-              }`}
-            >
-              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2}>
-                <path d="M4 6h16M7 12h10M10 18h4" />
-              </svg>
-            </button>
+        <div className="relative shrink-0">
+          <button
+            onClick={() => setCategoryMenuOpen((prev) => !prev)}
+            aria-label="Filter by category"
+            className={`flex h-[34px] w-[34px] items-center justify-center rounded-lg border transition-colors ${
+              categoryFilter || categoryMenuOpen
+                ? "border-cyan-400/40 bg-cyan-400/10 text-cyan-400"
+                : "border-white/10 bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-zinc-100"
+            }`}
+          >
+            <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2}>
+              <path d="M4 6h16M7 12h10M10 18h4" />
+            </svg>
+          </button>
 
-            {categoryMenuOpen && (
-              <div className="absolute right-0 top-full z-10 mt-1.5">
-                <FloatingPanel className="w-44 p-1.5">
+          {categoryMenuOpen && (
+            <div className="absolute right-0 top-full z-10 mt-1.5">
+              <FloatingPanel className="w-44 p-1.5">
+                <button
+                  onClick={() => {
+                    setCategoryFilter(null);
+                    setCategoryMenuOpen(false);
+                  }}
+                  className={`block w-full rounded-lg px-2.5 py-1.5 text-left text-xs font-medium transition-colors ${
+                    categoryFilter === null
+                      ? "bg-cyan-400/10 text-cyan-400"
+                      : "text-zinc-300 hover:bg-white/10"
+                  }`}
+                >
+                  All
+                </button>
+                {categoryOptions.map((category) => (
                   <button
+                    key={category}
                     onClick={() => {
-                      setCategoryFilter(null);
+                      setCategoryFilter(category);
                       setCategoryMenuOpen(false);
                     }}
                     className={`block w-full rounded-lg px-2.5 py-1.5 text-left text-xs font-medium transition-colors ${
-                      categoryFilter === null
+                      categoryFilter === category
                         ? "bg-cyan-400/10 text-cyan-400"
                         : "text-zinc-300 hover:bg-white/10"
                     }`}
                   >
-                    All
+                    {category}
                   </button>
-                  {categoryOptions.map((category) => (
-                    <button
-                      key={category}
-                      onClick={() => {
-                        setCategoryFilter(category);
-                        setCategoryMenuOpen(false);
-                      }}
-                      className={`block w-full rounded-lg px-2.5 py-1.5 text-left text-xs font-medium transition-colors ${
-                        categoryFilter === category
-                          ? "bg-cyan-400/10 text-cyan-400"
-                          : "text-zinc-300 hover:bg-white/10"
-                      }`}
-                    >
-                      {category}
-                    </button>
-                  ))}
-                </FloatingPanel>
-              </div>
-            )}
-          </div>
-        )}
+                ))}
+              </FloatingPanel>
+            </div>
+          )}
+        </div>
       </div>
 
-      <div className="mt-3 -mr-2 space-y-2 overflow-y-auto pr-2">
+      <div className="mt-3 min-h-0 flex-1 space-y-2 overflow-y-auto -mr-2 pr-2">
         {filteredItems.length === 0 && (
           <p className="py-6 text-center text-xs text-zinc-500">No matches.</p>
         )}
